@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>밍티의 AI 교실 선생님 화면</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="img/mingti-pixel.png">
+<style>
+@font-face{font-family:"Galmuri11";src:url("fonts/Galmuri11.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Galmuri11";src:url("fonts/Galmuri11-Bold.woff2") format("woff2");font-weight:700;font-display:swap}
+/* Layout: 학생 첫 화면과 같은 도트 세계를 크림색 '교무실' 톤으로. 위에 학습지 편집 메뉴, 아래에 GitHub 연결 창. */
+:root{color-scheme:light;--bg:#f3ecd8;--dot:#e6dcc2;--blue:#7fc0e6;--blue-deep:#4f97c8;--cream:#fbf4e2;--pink:#f2a3b4;--pink-soft:#fde3e9;
+  --brown:#8a5a3c;--line:#33506b;--white:#fff;--ok:#2c7a3f;--no:#b4381c;--pixel:"Galmuri11",system-ui,monospace}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{min-height:100vh;background-color:var(--bg);background-image:radial-gradient(var(--dot) 1.6px,transparent 1.7px);background-size:16px 16px;
+  color:var(--line);font-family:var(--pixel);font-size:15px;line-height:1.7;word-break:keep-all;overflow-wrap:anywhere;-webkit-font-smoothing:none;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:calc(env(safe-area-inset-top,0px) + 28px) calc(env(safe-area-inset-bottom,0px) + 40px)}
+.wrap{max-width:880px;margin:0 auto;display:grid;gap:32px}
+header{display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px;align-items:center}
+header img{width:120px;height:auto;image-rendering:pixelated}
+.badge{display:inline-block;font-size:.78rem;background:var(--brown);color:var(--white);padding:2px 10px;letter-spacing:.06em}
+h1{margin:6px 0 4px;font-size:clamp(1.7rem,5vw,2.4rem);line-height:1.2;color:var(--brown)}
+header p{margin:0;font-size:.9rem}
+.window{background:var(--cream);box-shadow:0 -4px 0 0 var(--line),0 4px 0 0 var(--line),-4px 0 0 0 var(--line),4px 0 0 0 var(--line),8px 8px 0 0 rgba(51,80,107,.2);margin:4px}
+.titlebar{display:flex;align-items:center;gap:10px;background:var(--blue);color:var(--white);padding:6px 14px;font-weight:700;border-bottom:4px solid var(--line)}
+.titlebar.pink{background:var(--pink)}
+.body{padding:18px;display:grid;gap:14px}
+.row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;background:var(--white);padding:12px 14px;
+  box-shadow:0 -3px 0 0 var(--line),0 3px 0 0 var(--line),-3px 0 0 0 var(--line),3px 0 0 0 var(--line);margin:3px}
+.row .no{font-weight:700;font-size:1.2rem;color:var(--white);background:var(--brown);width:2em;height:2em;display:grid;place-items:center}
+.row .no.alt{background:var(--blue-deep)}
+.row b{display:block;line-height:1.45}
+.row small{color:var(--blue-deep);font-size:.78rem}
+.acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.btn,button{font:inherit;font-size:.85rem;padding:5px 12px;background:var(--white);color:var(--line);border:0;cursor:pointer;text-decoration:none;white-space:nowrap;
+  box-shadow:0 -2px 0 0 var(--line),0 2px 0 0 var(--line),-2px 0 0 0 var(--line),2px 0 0 0 var(--line);margin:2px}
+.btn:hover,button:hover{background:var(--pink-soft)}
+.btn.primary,button.primary{background:var(--brown);color:var(--white)}
+.btn.primary:hover,button.primary:hover{background:#6f462e}
+.btn:focus-visible,button:focus-visible,input:focus-visible{outline:3px dashed var(--pink);outline-offset:4px}
+.state{display:flex;align-items:center;gap:10px;font-weight:700}
+.state i{width:12px;height:12px;display:inline-block;background:#bbb}
+.state.on i{background:var(--ok)} .state.off i{background:var(--no)}
+label{display:grid;gap:6px;font-size:.88rem}
+input[type=password],input[type=text]{font:inherit;padding:8px 10px;border:0;background:var(--white);color:var(--line);box-shadow:inset 0 0 0 2px var(--line);min-width:0;width:100%}
+.inline{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+ol.how{margin:0;padding-left:1.4em;font-size:.85rem;display:grid;gap:4px}
+.note{font-size:.8rem;color:#6b7d8c;background:var(--white);padding:8px 12px;border-left:4px solid var(--blue)}
+.msg{font-size:.85rem;min-height:1.4em}
+.msg.ok{color:var(--ok)} .msg.no{color:var(--no)}
+a{color:var(--blue-deep)}
+footer{text-align:center;font-size:.75rem;color:#8b7a58}
+@media (max-width:620px){
+  header{grid-template-columns:minmax(0,1fr)} header img{width:90px}
+  .row{grid-template-columns:auto minmax(0,1fr)} .acts{grid-column:1/-1;justify-content:flex-start}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img src="img/mingti-pixel.png" alt="도트로 그린 밍티" width="132" height="148">
+    <div>
+      <span class="badge">TEACHER ONLY</span>
+      <h1>선생님 화면</h1>
+      <p>학습지 글씨와 그림을 고치고, 교사용 자료를 볼 수 있어요. 학생 첫 화면에는 이 페이지로 가는 링크가 없어요.</p>
+    </div>
+  </header>
+
+  <section class="window" aria-labelledby="t1">
+    <div class="titlebar" id="t1">학습지 고치기</div>
+    <div class="body">
+      <div class="row">
+        <span class="no">0</span>
+        <div><b>Orange3로 해보는 데이터 분석</b><small>worksheet0.html</small></div>
+        <div class="acts"><a class="btn" href="worksheet0.html" target="_blank" rel="noopener">학생 화면</a><a class="btn primary" href="editor.html?file=worksheet0.html">고치기</a></div>
+      </div>
+      <div class="row">
+        <span class="no">1</span>
+        <div><b>개인에 관한 신상정보로 소득 정도를 예측할 수 있을까?</b><small>worksheet.html</small></div>
+        <div class="acts"><a class="btn" href="worksheet.html" target="_blank" rel="noopener">학생 화면</a><a class="btn primary" href="editor.html?file=worksheet.html">고치기</a></div>
+      </div>
+      <div class="row">
+        <span class="no alt">홈</span>
+        <div><b>학생 첫 화면</b><small>index.html · 밍티 말풍선, 학습지 목록 글씨</small></div>
+        <div class="acts"><a class="btn" href="index.html" target="_blank" rel="noopener">학생 화면</a><a class="btn primary" href="editor.html?file=index.html">고치기</a></div>
+      </div>
+      <p class="note">학습지를 새로 추가하거나 문항 구조(채점 정답, 빈칸 개수)를 바꾸는 일은 이 편집기로는 할 수 없어요. 글씨, 그림, 그림 설명을 고치는 용도예요.</p>
+    </div>
+  </section>
+
+  <section class="window" aria-labelledby="t2">
+    <div class="titlebar pink" id="t2">교사용 자료</div>
+    <div class="body">
+      <div class="row">
+        <span class="no alt">T</span>
+        <div><b>1번 수업 자료: 소득 예측 회귀 실습</b><small>단계별 설명, 원자료 오류 정정 메모, 상관계수 체험</small></div>
+        <div class="acts"><a class="btn" href="lesson.html" target="_blank" rel="noopener">보기</a><a class="btn primary" href="editor.html?file=lesson.html">고치기</a></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="window" aria-labelledby="t3">
+    <div class="titlebar" id="t3">GitHub 연결</div>
+    <div class="body">
+      <div class="state" id="state"><i></i><span>확인 중…</span></div>
+      <p style="margin:0;font-size:.88rem">고친 내용을 저장하려면 이 브라우저를 GitHub 저장소 <b>gus-wn/orange3_mintea</b>에 한 번 연결해야 해요. 토큰은 이 컴퓨터의 브라우저에만 저장되고 GitHub 말고 다른 곳으로는 보내지 않아요.</p>
+      <ol class="how">
+        <li><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub 토큰 만들기 페이지</a>를 엽니다. (GitHub 로그인 필요)</li>
+        <li>Token name에 <b>밍티 편집기</b>, Expiration은 원하는 기간을 고릅니다.</li>
+        <li>Repository access에서 <b>Only select repositories</b> → <b>orange3_mintea</b>만 고릅니다.</li>
+        <li>Permissions → Repository permissions에서 <b>Contents</b>를 <b>Read and write</b>로 바꿉니다.</li>
+        <li><b>Generate token</b>을 누르고, 나온 토큰(github_pat_로 시작)을 복사해 아래에 붙여 넣습니다.</li>
+      </ol>
+      <label for="tok">토큰
+        <div class="inline"><input type="password" id="tok" autocomplete="off" placeholder="github_pat_..." style="flex:1 1 240px"><button type="button" class="primary" id="saveTok">연결하기</button><button type="button" id="clearTok">연결 끊기</button></div>
+      </label>
+      <div class="msg" id="msg" aria-live="polite"></div>
+      <p class="note">학교 공용 컴퓨터에서 연결했다면 수업이 끝난 뒤 '연결 끊기'를 눌러 주세요. 토큰이 다른 사람에게 알려지면 GitHub에서 바로 삭제하면 돼요.</p>
+    </div>
+  </section>
+
+  <footer>밍티의 AI 교실 · 선생님 화면</footer>
+</div>
+<script>
+(function(){
+  const KEY="mintea-gh-token",$=id=>document.getElementById(id);
+  const get=()=>{try{return localStorage.getItem(KEY)||""}catch(e){return""}};
+  const set=v=>{try{v?localStorage.setItem(KEY,v):localStorage.removeItem(KEY)}catch(e){}};
+  function show(on,text){$("state").className="state "+(on?"on":"off");$("state").querySelector("span").textContent=text}
+  async function check(t){
+    if(!t){show(false,"연결 안 됨");return false}
+    try{
+      const r=await fetch("https://api.github.com/repos/gus-wn/orange3_mintea",{headers:{"Accept":"application/vnd.github+json","Authorization":"Bearer "+t},cache:"no-store"});
+      if(r.status===401){show(false,"토큰이 맞지 않거나 만료됐어요");return false}
+      if(!r.ok){show(false,"이 토큰으로는 저장소를 볼 수 없어요");return false}
+      const j=await r.json();
+      if(j.permissions&&j.permissions.push){show(true,"연결됨 · 저장할 수 있어요");return true}
+      show(false,"읽기만 가능해요. Contents 권한을 Read and write로 바꿔 주세요");return false;
+    }catch(e){show(false,"인터넷 연결을 확인해 주세요");return false}
+  }
+  $("saveTok").onclick=async()=>{
+    const t=$("tok").value.trim();if(!t){$("msg").textContent="토큰을 붙여 넣어 주세요.";$("msg").className="msg no";return}
+    $("msg").textContent="확인 중…";$("msg").className="msg";
+    const ok=await check(t);
+    if(ok){set(t);$("tok").value="";$("msg").textContent="연결했어요. 이제 '고치기'를 눌러 학습지를 고칠 수 있어요.";$("msg").className="msg ok"}
+    else{$("msg").textContent="연결하지 못했어요. 위 상태 표시를 확인해 주세요.";$("msg").className="msg no"}
+  };
+  $("clearTok").onclick=()=>{set("");show(false,"연결 안 됨");$("msg").textContent="연결을 끊었어요.";$("msg").className="msg"};
+  check(get());
+})();
+</script>
+</body>
+</html>
