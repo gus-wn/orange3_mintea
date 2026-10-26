@@ -85,6 +85,8 @@ th{background:#f2f5f7;font-weight:700;font-size:.82rem}
 tr:last-child td{border-bottom:0}
 td.num,th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
 td input.blank{width:6em}
+table.zones td:first-child{width:3.5em;text-align:center;font-family:var(--hand);font-size:1.15rem;color:var(--orange)}
+table.zones td:nth-child(2){width:28%}
 .tag{font-family:var(--mono);font-size:.82rem}
 
 /* 개념 상자 */
@@ -167,9 +169,35 @@ button:disabled{opacity:.6;cursor:wait}
       <p>성별, 가족 구성원 수, 태어난 해, 결혼 여부처럼 다른 개인 정보도 소득에 영향을 줄 수 있습니다. 오늘은 실제 한국인 데이터로 이 질문을 확인해 봅니다.</p>
     </div>
   </div>
+  <div class="tbl">
+    <table class="zones">
+      <thead><tr><th>Zone</th><th>필요한 교육·훈련</th><th>직업과 평균 연봉 (2009년 미국)</th></tr></thead>
+      <tbody>
+        <tr><td class="num">1</td><td>일부 직업은 고등학교 졸업장이나 검정고시가 필요할 수 있음</td><td>웨이터·웨이트리스 $17,700 · 레크리에이션 시설 직원 $18,100 · 청소원 $22,000 · 조경 작업자 $23,500 · 건설 노동자 $29,100 · 정화조 관리원 $33,300</td></tr>
+        <tr><td class="num">2</td><td>대체로 고등학교 졸업장이 필요함</td><td>바텐더 $18,300 · 판매원 $20,300 · 경비원 $23,800 · 스쿨버스 기사 $27,400 · 고객 상담원 $30,300 · 산불 진화대원 $45,100</td></tr>
+        <tr><td class="num">3</td><td>직업학교 교육, 현장 경험, 전문대 학위가 필요함</td><td>약국 보조원 $28,100 · 피트니스 트레이너 $30,700 · 자동차 정비사 $35,400 · 법률 보조원 $47,000 · 순찰 경찰관 $53,200 · 간호사 $63,800 · 치위생사 $67,400 · 웹 개발자 $77,000</td></tr>
+        <tr><td class="num">4</td><td>대부분 4년제 대학 학위가 필요함 (아닌 경우도 있음)</td><td>사회복지사 $40,000 · 초등학교 교사 $50,500 · 회계사 $60,300 · 데이터베이스 관리자 $71,600 · 토목 기술자 $76,600 · 영업 관리자 $96,800</td></tr>
+        <tr><td class="num">5</td><td>대학원 이상(석사, 박사, 의학·법학 학위)이 필요함</td><td>고고학자 $53,500 · 척추 지압사 $67,700 · 수학자 $93,600 · 변호사 $113,200 · 최고경영자 $160,700 · 외과 의사 $166,400 이상</td></tr>
+      </tbody>
+    </table>
+  </div>
   <div class="q">
-    <p class="qt" data-n="Q1.">학력 말고 소득에 영향을 줄 것 같은 요인을 3가지 적고, 그렇게 생각한 이유를 함께 써 봅시다.</p>
-    <textarea id="q1" aria-label="Q1 답"></textarea>
+    <p class="qt" data-n="Q1-1.">표를 보고 Zone이 올라갈수록(필요한 교육이 길어질수록) 평균 연봉은 대체로 어떻게 변하는지 골라 봅시다.</p>
+    <p><select id="z1" data-ans="대체로 높아진다" aria-label="Zone에 따른 연봉 변화"><option value="">선택</option><option>대체로 높아진다</option><option>대체로 낮아진다</option><option>별 차이가 없다</option></select></p>
+    <div class="check"><button type="button" data-check="z1">정답 확인</button><span class="result" id="r-z"></span></div>
+  </div>
+  <div class="q">
+    <p class="qt" data-n="Q1-2.">그런데 낮은 Zone의 직업이 더 높은 Zone의 직업보다 연봉이 많은 경우도 있습니다. 표에서 두 가지를 찾아 써 봅시다.</p>
+    <textarea id="q1b" aria-label="Q1-2 답"></textarea>
+    <details class="hint"><summary>힌트</summary>Zone 2의 맨 오른쪽 직업과 Zone 4의 맨 왼쪽 직업, Zone 3의 맨 오른쪽 직업과 Zone 5의 맨 왼쪽 직업을 비교해 보세요.</details>
+  </div>
+  <div class="q">
+    <p class="qt" data-n="Q1-3.">이 자료는 2009년 미국 자료입니다. 지금 한국에 그대로 적용해도 될까요? 그렇게 생각한 이유와 함께 써 봅시다.</p>
+    <textarea id="q1c" aria-label="Q1-3 답"></textarea>
+  </div>
+  <div class="q">
+    <p class="qt" data-n="Q1-4.">그림 위 문장처럼 교육이 성공을 보장하지는 않는다면, 학력 말고 소득에 영향을 줄 것 같은 요인을 3가지 적고, 그렇게 생각한 이유를 함께 써 봅시다.</p>
+    <textarea id="q1" aria-label="Q1-4 답"></textarea>
   </div>
 </section>
 
@@ -441,7 +469,7 @@ button:disabled{opacity:.6;cursor:wait}
   $("copyAll").onclick=()=>{
     const v=id=>($(id)&&$(id).value)||"";
     const lines=[`[소득 예측 AI 학습지] ${v("sid")} ${v("sname")} (${v("sdate")})`,
-      `Q1. ${v("q1")}`,`Q2. ${v("b1")}~${v("b2")}, ${v("b3")}, ${v("b4")}`,
+      `Q1-1. ${v("z1")}`,`Q1-2. ${v("q1b")}`,`Q1-3. ${v("q1c")}`,`Q1-4. ${v("q1")}`,`Q2. ${v("b1")}~${v("b2")}, ${v("b3")}, ${v("b4")}`,
       `Q3. `+roles.map(([n])=>`${n}:${v("role-"+n)}`).join(", "),
       `Q4. ${v("k1")}, ${v("k2")}, ${v("k3")}`,
       `Q5. `+corr.map(([n])=>`${n} ${v("c-"+n)} ${v("cl-"+n)}`).join(" / "),
