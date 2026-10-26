@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Orange3 데이터 분석 학습지</title>
+<link rel="icon" href="img/mingti-pixel.png">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+@font-face{font-family:"ChosunMyungjoEmbed";src:url("fonts/ChosunilboMyungjo.woff") format("woff");font-display:swap}
+@font-face{font-family:"KkubulimLocal";src:local("꾸불림체"),local("꾸불림"),local("Kkubulim")}
+/* Layout: 1번 학습지와 같은 A4 종이 한 장. 위젯 연결도는 오렌지3 캔버스를 본뜬 작은 그림으로 그린다. */
+:root{
+  color-scheme:light;
+  --desk:#e4e8eb; --paper:#ffffff; --ink:#1c2830; --muted:#5f6d75; --rule:#cfd7dc;
+  --orange:#d4621a; --orange-soft:#fdeee3; --teal:#17697a; --teal-soft:#e2f0f2;
+  --ok-soft:#e5f3e8; --no-soft:#fbe7e1; --memo:#fff7d6;
+  --w-data:#f6b26b; --w-vis:#f4a6a6; --w-model:#e8a3d6; --w-eval:#9fd8e0;
+  --hand:"KkubulimLocal","꾸불림체","Gaegu","ChosunMyungjoEmbed",cursive;
+  --serif:"조선일보명조","Chosunilbo_myungjo","ChosunMyungjoEmbed","Nanum Myeongjo","AppleMyungjo","Batang",serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--desk);color:var(--ink);font-family:var(--serif);font-size:16.5px;line-height:1.75;word-break:keep-all;overflow-wrap:anywhere;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:calc(env(safe-area-inset-top,0px) + 28px) calc(env(safe-area-inset-bottom,0px) + 64px)}
+.sheet{max-width:860px;margin:0 auto;background:var(--paper);border-radius:4px;box-shadow:0 1px 3px rgba(20,30,40,.12),0 12px 32px rgba(20,30,40,.08);padding:clamp(20px,5vw,56px);display:grid;gap:44px}
+h1,h2,h3{font-family:var(--hand);font-weight:700;margin:0;text-wrap:balance;line-height:1.25}
+p{margin:0}
+code,.mono{font-family:var(--mono);font-size:.86em}
+code{background:var(--teal-soft);color:var(--teal);padding:0 5px;border-radius:3px}
+a{color:var(--teal)}
+
+.head{display:grid;gap:18px;border-bottom:3px double var(--ink);padding-bottom:22px}
+.course{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 16px;font-size:.85rem;color:var(--muted)}
+.home{color:var(--teal);text-decoration:none;font-family:var(--hand);font-size:1.05rem}
+.home:hover{text-decoration:underline}
+.head h1{font-size:clamp(1.9rem,5vw,2.7rem)}
+.head h1 small{display:block;font-size:.5em;color:var(--orange);margin-bottom:4px}
+.idrow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.idrow label{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:end;gap:8px;font-size:.92rem}
+.idrow input{border:0;border-bottom:1.5px solid var(--ink);font:inherit;font-family:var(--hand);font-size:1.2rem;padding:0 4px;min-width:0;background:transparent;color:var(--ink)}
+.goals{background:var(--orange-soft);border-radius:6px;padding:14px 18px;display:grid;gap:6px}
+.goals b{font-family:var(--hand);font-size:1.2rem;color:var(--orange)}
+.goals ul{margin:0;padding-left:1.2em}
+
+.act{display:grid;gap:16px}
+.act-h{display:flex;align-items:baseline;gap:12px;border-bottom:1.5px solid var(--ink);padding-bottom:6px;flex-wrap:wrap}
+.act-h .no{font-family:var(--hand);font-size:1.05rem;color:#fff;background:var(--orange);padding:0 12px;border-radius:999px;white-space:nowrap}
+.act-h h2{font-size:1.65rem}
+.act-h .tool{margin-left:auto;font-size:.8rem;color:var(--muted)}
+.read{display:grid;gap:10px;max-width:68ch}
+ol.steps{margin:0;padding-left:1.4em;display:grid;gap:6px;max-width:68ch}
+ol.steps li::marker{font-family:var(--hand);color:var(--orange);font-weight:700}
+.q{display:grid;gap:10px;padding:14px 0 4px;border-top:1px dashed var(--rule)}
+.q .qt{font-weight:700}
+.q .qt::before{content:attr(data-n);font-family:var(--hand);color:var(--orange);font-size:1.25rem;margin-right:6px}
+textarea{width:100%;min-height:92px;font:inherit;font-family:var(--hand);font-size:1.2rem;line-height:32px;padding:0 8px;border:1px solid var(--rule);border-radius:4px;resize:vertical;color:var(--ink);
+  background:repeating-linear-gradient(to bottom,transparent 0 31px,var(--rule) 31px 32px),var(--paper);background-attachment:local}
+input.blank{font:inherit;font-family:var(--hand);font-size:1.2rem;width:7em;max-width:100%;border:0;border-bottom:1.5px solid var(--ink);text-align:center;background:transparent;color:var(--ink);padding:0 4px}
+select{font:inherit;font-size:.92rem;padding:3px 6px;border:1px solid var(--rule);border-radius:4px;background:var(--paper);color:var(--ink);max-width:100%}
+textarea:focus-visible,input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+.ok{background:var(--ok-soft)!important}
+.no-{background:var(--no-soft)!important}
+.check{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button{font:inherit;font-family:var(--hand);font-size:1.1rem;padding:2px 16px;border-radius:999px;border:1.5px solid var(--ink);background:var(--paper);color:var(--ink);cursor:pointer}
+button:hover{background:var(--ink);color:var(--paper)}
+button.pdf{background:var(--orange);border-color:var(--orange);color:#fff}
+button.pdf:hover{background:#b8520f;border-color:#b8520f}
+button:disabled{opacity:.6;cursor:wait}
+.result{font-size:.9rem;color:var(--muted)}
+details.hint{background:var(--memo);border-radius:4px;padding:8px 14px;font-size:.92rem}
+details.hint summary{cursor:pointer;font-family:var(--hand);font-size:1.1rem;color:var(--orange)}
+details.hint[open] summary{margin-bottom:6px}
+.tick{display:grid;gap:6px}
+.tick label{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+.tick input{accent-color:var(--orange);margin-top:6px;width:18px;height:18px;flex:none}
+
+.tbl{overflow-x:auto;border:1px solid var(--rule);border-radius:4px}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{padding:8px 12px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:middle}
+th{background:#f2f5f7;font-weight:700;font-size:.82rem}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+td input.blank{width:5.5em}
+.tag{font-family:var(--mono);font-size:.82rem;white-space:nowrap}
+
+.concept{border:1.5px solid var(--teal);border-radius:6px;padding:16px 18px;display:grid;gap:10px}
+.concept h3{font-size:1.35rem;color:var(--teal)}
+
+/* 오렌지3 화면 그림 */
+.mock{border:1px solid var(--rule);border-radius:6px;overflow:hidden;font-family:var(--mono);font-size:.78rem}
+.mock .bar{background:#eef1f3;padding:4px 10px;color:var(--muted);border-bottom:1px solid var(--rule)}
+.mock .body{display:grid;grid-template-columns:minmax(120px,190px) minmax(0,1fr);min-height:230px}
+.mock .pal{background:#f7f8f9;border-right:1px solid var(--rule);padding:8px;display:grid;gap:4px;align-content:start}
+.mock .pal div{padding:3px 8px;border-radius:3px;display:flex;align-items:center;gap:6px}
+.mock .pal i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.mock .canvas{position:relative;background:radial-gradient(#e3e8eb 1px,transparent 1.2px) 0 0/14px 14px;padding:10px;min-width:0}
+.mark{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--orange);color:#fff;font-family:var(--hand);font-size:1rem;font-weight:700}
+.flow{overflow-x:auto}
+.flow svg{display:block;min-width:520px;width:100%;height:auto}
+.flow text{font-family:var(--mono);font-size:12px;fill:var(--ink)}
+
+.fig{margin:0;display:grid;gap:6px;min-width:0}
+.fig img{width:100%;max-width:100%;height:auto;display:block;border:1px solid var(--rule);border-radius:4px}
+.fig figcaption{font-size:.8rem;color:var(--muted)}
+.fig.narrow{max-width:520px}
+.figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;align-items:start}
+code{overflow-wrap:anywhere}
+.self{display:grid;gap:8px}
+.self .row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;border-bottom:1px dashed var(--rule);padding-bottom:6px}
+.stars{display:flex;gap:2px}
+.stars button{border:0;padding:0 2px;font-size:1.5rem;line-height:1;color:var(--rule);background:none}
+.stars button.on{color:var(--orange)}
+.stars button:hover{background:none;color:var(--orange)}
+.foot{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;border-top:3px double var(--ink);padding-top:16px;font-size:.82rem;color:var(--muted)}
+.foot .btns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.toast{font-family:var(--hand);font-size:1.1rem;color:#2c7a3f}
+
+.pdfmode .sheet{box-shadow:none;border-radius:0}
+.pdfmode .check,.pdfmode .foot .btns,.pdfmode details.hint,.pdfmode .home,.pdfmode .copyurl{display:none!important}
+.ta-print{min-height:64px;white-space:pre-wrap;overflow-wrap:anywhere;font-family:var(--hand);font-size:1.2rem;line-height:32px;padding:4px 10px;border:1px solid var(--rule);border-bottom:2px solid var(--ink);border-radius:4px;background:#fff}
+.sel-print{font-family:var(--hand);font-size:1.15rem;border-bottom:1.5px solid var(--ink);padding:0 6px}
+@media (max-width:640px){
+  .idrow{grid-template-columns:minmax(0,1fr)}
+  .act-h .tool{margin-left:0;width:100%}
+  .mock .body{grid-template-columns:minmax(0,1fr)}
+  .mock .pal{border-right:0;border-bottom:1px solid var(--rule);grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+</style>
+</head>
+<body>
+<div class="sheet">
+<header class="head">
+  <div class="course"><a class="home" href="index.html">← 밍티의 수업 목록</a><span>정보 · 인공지능 수업 | 데이터 기반 인공지능</span><span>0. 오리엔테이션</span></div>
+  <h1><small>활동 학습지 0</small>Orange3로 해보는<br>데이터 분석</h1>
+  <div class="idrow">
+    <label for="sid">학번 <input id="sid" autocomplete="off"></label>
+    <label for="sname">이름 <input id="sname" autocomplete="off"></label>
+    <label for="sdate">날짜 <input id="sdate" autocomplete="off"></label>
+  </div>
+  <div class="goals">
+    <b>학습 목표</b>
+    <ul>
+      <li>Orange3를 설치하고 위젯을 연결해 데이터를 불러올 수 있다.</li>
+      <li>위젯으로 표를 고르고 고치며, 대푯값과 분포를 그래프로 확인할 수 있다.</li>
+      <li>선형 회귀 모델로 새로운 데이터의 결과를 예측할 수 있다.</li>
+    </ul>
+  </div>
+</header>
+
+<!-- 생각 열기 -->
+<section class="act">
+  <div class="act-h"><span class="no">생각 열기</span><h2>코딩 없이 데이터를 다룰 수 있을까?</h2></div>
+  <div class="read">
+    <p><b>Orange3</b>는 코드를 쓰지 않고 <b>끌어다 놓기(드래그 앤 드롭)</b>만으로 데이터를 분석하는 도구입니다. 표를 고치고, 그래프를 그리고, 머신러닝 모델까지 만들 수 있습니다.</p>
+    <p>오늘은 수학 원리를 모두 파헤치기보다 <b>입력 → 처리 → 출력</b>을 직접 경험해 보면서, 머신러닝이 얼마나 쓸모 있는 도구인지 빠르게 살펴봅니다.</p>
+  </div>
+  <div class="flow"><svg viewBox="0 0 560 90" aria-label="입력, 처리, 출력 흐름">
+    <rect x="10" y="20" width="140" height="50" rx="8" fill="var(--w-data)"/><text x="80" y="50" text-anchor="middle" style="font-size:15px">입력 (데이터)</text>
+    <path d="M150 45 H 205" stroke="#8a99a3" stroke-width="2"/><path d="M198 39 L206 45 L198 51" stroke="#8a99a3" stroke-width="2" fill="none"/>
+    <rect x="210" y="20" width="140" height="50" rx="8" fill="var(--w-model)"/><text x="280" y="50" text-anchor="middle" style="font-size:15px">처리 (위젯)</text>
+    <path d="M350 45 H 405" stroke="#8a99a3" stroke-width="2"/><path d="M398 39 L406 45 L398 51" stroke="#8a99a3" stroke-width="2" fill="none"/>
+    <rect x="410" y="20" width="140" height="50" rx="8" fill="var(--w-eval)"/><text x="480" y="50" text-anchor="middle" style="font-size:15px">출력 (결과)</text>
+  </svg></div>
+  <div class="q">
+    <p class="qt" data-n="Q1.">우리 생활에서 '데이터를 보고 앞으로를 예측'하는 경우를 하나 떠올려 써 봅시다. (예: 날씨에 따라 아이스크림을 얼마나 준비할까?)</p>
+    <textarea id="q1" aria-label="Q1 답"></textarea>
+  </div>
+</section>
+
+<!-- 활동 1 설치 -->
+<section class="act">
+  <div class="act-h"><span class="no">활동 1</span><h2>Orange3 설치하기</h2><span class="tool">orangedatamining.com</span></div>
+  <ol class="steps">
+    <li><code>orangedatamining.com</code>에 들어가 위쪽 메뉴의 <b>Download</b>를 누릅니다.</li>
+    <li>내 컴퓨터에 맞는 운영체제(Windows / macOS)를 고르고 설치 파일을 내려받습니다. 용량이 수백 MB라 시간이 조금 걸립니다.</li>
+    <li>설치 파일을 실행해 안내대로 설치하고, <b>Orange</b>를 실행합니다. 시작 창에서 <b>New</b>를 누르면 빈 캔버스가 열립니다.</li>
+  </ol>
+  <figure class="fig narrow"><img src="img/o3-download.jpg" alt="Orange 다운로드 페이지"><figcaption>Orange 홈페이지의 다운로드 화면. 파이썬을 쓸 줄 알면 <code>pip install orange3</code>로도 설치할 수 있습니다.</figcaption></figure>
+  <details class="hint"><summary>학교 컴퓨터에서 설치가 안 될 때</summary>관리자 권한이 필요하면 선생님께 말씀드리세요. 이미 설치된 컴퓨터라면 시작 메뉴에서 'Orange'를 검색해 실행하면 됩니다.</details>
+  <div class="q">
+    <p class="qt" data-n="Q2.">내가 마친 단계에 체크해 봅시다.</p>
+    <div class="tick">
+      <label><input type="checkbox" id="i1">설치 파일을 내려받았다.</label>
+      <label><input type="checkbox" id="i2">설치를 마쳤다.</label>
+      <label><input type="checkbox" id="i3">Orange를 실행해 빈 캔버스를 열었다.</label>
+    </div>
+  </div>
+</section>
+
+<!-- 활동 2 화면과 데이터 -->
+<section class="act">
+  <div class="act-h"><span class="no">활동 2</span><h2>화면 둘러보고 데이터 불러오기</h2><span class="tool">File · Data Table</span></div>
+  <div class="mock" role="img" aria-label="오렌지3 화면 구성 그림">
+    <div class="bar">Orange — Untitled</div>
+    <div class="body">
+      <div class="pal">
+        <div style="font-family:var(--hand);font-size:1rem"><span class="mark">1</span> 위젯 팔레트</div>
+        <div><i style="background:var(--w-data)"></i>Data</div>
+        <div><i style="background:#f6d06b"></i>Transform</div>
+        <div><i style="background:var(--w-vis)"></i>Visualize</div>
+        <div><i style="background:var(--w-model)"></i>Model</div>
+        <div><i style="background:var(--w-eval)"></i>Evaluate</div>
+        <div><i style="background:#b9d38c"></i>Unsupervised</div>
+      </div>
+      <div class="canvas">
+        <div style="font-family:var(--hand);font-size:1rem;display:flex;gap:6px;align-items:center"><span class="mark">2</span> 캔버스</div>
+        <svg viewBox="0 0 420 150" style="width:100%;max-width:420px;height:auto;display:block;margin-top:10px" aria-hidden="true">
+          <path d="M80 70 C140 70 160 70 220 70" stroke="#8a99a3" stroke-width="2" fill="none"/>
+          <circle cx="56" cy="70" r="26" fill="#f6b26b"/><text x="56" y="115" text-anchor="middle">File</text>
+          <circle cx="246" cy="70" r="26" fill="#f6b26b"/><text x="246" y="115" text-anchor="middle">Data Table</text>
+          <rect x="128" y="30" width="26" height="22" rx="11" fill="#d4621a"/><text x="141" y="46" text-anchor="middle" style="fill:#fff;font-family:Gaegu,cursive;font-size:15px;font-weight:700">3</text>
+          <text x="150" y="92" text-anchor="middle" style="fill:#5f6d75;font-size:11px">Data</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="read">
+    <p><span class="mark">1</span> <b>위젯 팔레트</b>: 기능 상자(위젯)가 종류별로 모여 있습니다.<br>
+    <span class="mark">2</span> <b>캔버스</b>: 위젯을 끌어다 놓고 작업 흐름을 만드는 곳입니다.<br>
+    <span class="mark">3</span> <b>연결선</b>: 위젯 오른쪽의 회색 곡선 부분을 끌어서 빈 곳에 놓으면 이어 붙일 위젯 목록이 뜹니다. 선 위의 글자는 무엇이 전달되는지 알려 줍니다.</p>
+  </div>
+  <div class="q">
+    <p class="qt" data-n="Q3.">위젯 묶음과 하는 일을 알맞게 연결해 봅시다.</p>
+    <div class="tbl"><table><tbody id="catRows"></tbody></table></div>
+    <div class="check"><button type="button" data-check-group="cat">정답 확인</button><span class="result" id="r-cat"></span></div>
+  </div>
+
+  <h3>오늘의 데이터: 레모네이드 판매 기록</h3>
+  <div class="read"><p>레모네이드 가게의 5일 동안의 기록입니다. 날마다 날짜, 요일, 온도, 판매량, 가게 문을 연 시간을 적었습니다.</p></div>
+  <figure class="fig narrow"><img src="img/o3-lemon-data.jpg" alt="레모네이드 판매 데이터 표"><figcaption>레모네이드 판매 데이터</figcaption></figure>
+  <ol class="steps">
+    <li>Data 묶음의 <b>File</b> 위젯을 캔버스에 놓고 더블클릭합니다.</li>
+    <li><b>URL</b>을 고르고 아래 주소를 붙여 넣은 뒤 Enter를 누릅니다. 바로 안 뜨면 <b>Reload</b>를 누릅니다.<br><code id="dataUrl">https://gus-wn.github.io/orange3_mintea/data/lemonade.csv</code> <button type="button" class="copyurl" data-target="dataUrl" style="font-size:.9rem;padding:0 10px">주소 복사</button></li>
+    <li>File 오른쪽 곡선을 끌어 <b>Data Table</b>을 연결하고, 더블클릭해 표를 확인합니다.</li>
+  </ol>
+  <div class="figs">
+    <figure class="fig"><img src="img/o3-file-url.jpg" alt="File 위젯에 URL 넣기"><figcaption>File 위젯의 URL 칸에 데이터 주소 넣기</figcaption></figure>
+    <figure class="fig"><img src="img/o3-datatable.jpg" alt="Data Table로 데이터 확인"><figcaption>File → Data Table로 표 확인</figcaption></figure>
+  </div>
+  <details class="hint"><summary>구글 시트로 내 데이터를 불러오고 싶다면</summary>
+    구글 시트에서 <b>공유 → 링크가 있는 모든 사용자</b>로 바꾼 뒤 링크를 복사해 File의 URL 칸에 넣으면 됩니다. 공개하지 않은 시트는 오렌지3가 읽을 수 없습니다.
+    <figure class="fig narrow" style="margin-top:8px"><img src="img/o3-share-link.jpg" alt="구글 시트 링크 공유 설정"></figure>
+  </details>
+  <div class="q">
+    <p class="qt" data-n="Q4.">Data Table을 보고 빈칸을 채워 봅시다.</p>
+    <p>이 데이터는 <input class="blank" id="d1" data-ans="5|5개|5일" inputmode="numeric" aria-label="행 수">개의 행(날)과 <input class="blank" id="d2" data-ans="5|5개" inputmode="numeric" aria-label="열 수">개의 열로 되어 있다. 온도가 1도 오를 때마다 판매량은 <input class="blank" id="d3" data-ans="2|2개" inputmode="numeric" aria-label="판매량 증가">개씩 늘었다.</p>
+    <div class="check"><button type="button" data-check="d1,d2,d3">정답 확인</button><span class="result" id="r-d1"></span></div>
+  </div>
+</section>
+
+<!-- 활동 3 표 다루기 -->
+<section class="act">
+  <div class="act-h"><span class="no">활동 3</span><h2>표 다루기</h2><span class="tool">Select Rows · Select Columns · Feature Constructor</span></div>
+  <h3>① Select Rows: 원하는 행만 골라내기</h3>
+  <ol class="steps">
+    <li>File에 <b>Select Rows</b>를 연결하고 더블클릭합니다.</li>
+    <li>조건을 <code>판매량</code> · <code>is below</code> · <code>44</code>로 정합니다. (판매량이 44 미만인 날)</li>
+    <li>Select Rows에 Data Table을 하나 더 연결해 골라낸 행을 확인합니다.</li>
+    <li>또 다른 Data Table을 연결하고, <b>연결선을 더블클릭</b>해 <b>Unmatched Data → Data</b>로 바꿔 봅니다. 조건에 맞지 않아 걸러진 행이 보입니다.</li>
+  </ol>
+  <div class="figs">
+    <figure class="fig"><img src="img/o3-select-rows.jpg" alt="Select Rows 조건 설정"><figcaption>Select Rows 조건: 판매량이 44보다 작은 행</figcaption></figure>
+    <figure class="fig"><img src="img/o3-edit-links.jpg" alt="Edit Links 창"><figcaption>연결선을 더블클릭해 Unmatched Data로 바꾸기</figcaption></figure>
+  </div>
+  <div class="q">
+    <p class="qt" data-n="Q5.">Select Rows 결과를 적어 봅시다.</p>
+    <p>조건에 맞는 행(Matching Data)은 <input class="blank" id="s1" data-ans="2|2개" inputmode="numeric" aria-label="조건에 맞는 행 수">개, 걸러진 행(Unmatched Data)은 <input class="blank" id="s2" data-ans="3|3개" inputmode="numeric" aria-label="걸러진 행 수">개이다.</p>
+    <div class="check"><button type="button" data-check="s1,s2">정답 확인</button><span class="result" id="r-s1"></span></div>
+  </div>
+
+  <h3>② Select Columns: 보고 싶은 열만 남기기</h3>
+  <div class="read"><p>Select Columns를 열면 왼쪽(Available Variables)은 숨길 열, 오른쪽(Features)은 보일 열입니다. 보고 싶은 열을 오른쪽으로, 보고 싶지 않은 열을 왼쪽으로 옮깁니다.</p></div>
+  <figure class="fig narrow"><img src="img/o3-select-columns.jpg" alt="Select Columns 창"><figcaption>오픈시간을 왼쪽으로 옮겨 숨긴 모습</figcaption></figure>
+
+  <h3>③ Feature Constructor: 새 열 만들기</h3>
+  <div class="read"><p>레모네이드 한 잔이 5,000원이라면 하루 매출은 얼마일까요? <b>Feature Constructor</b>에서 <b>New → Numeric</b>을 고르고, 이름을 <code>매출</code>, 식을 <code>판매량*5000</code>으로 적은 뒤 <b>Send</b>를 누릅니다. 뒤에 Data Table을 연결하면 매출 열이 생긴 것을 볼 수 있습니다.</p></div>
+  <figure class="fig"><img src="img/o3-feature-constructor.jpg" alt="Feature Constructor로 매출 열 만들기"><figcaption>Select Rows → Select Columns → Feature Constructor → Data Table</figcaption></figure>
+  <div class="q">
+    <p class="qt" data-n="Q6.">판매량이 46인 날의 매출은 얼마일까요?</p>
+    <p><input class="blank" id="f1" data-ans="230000|230,000|230000원|230,000원|23만|23만원" aria-label="매출" style="width:8em">원</p>
+    <div class="check"><button type="button" data-check="f1">정답 확인</button><span class="result" id="r-f1"></span></div>
+  </div>
+</section>
+
+<!-- 활동 4 통계와 시각화 -->
+<section class="act">
+  <div class="act-h"><span class="no">활동 4</span><h2>통계와 시각화</h2><span class="tool">Box Plot · Scatter Plot</span></div>
+  <div class="concept">
+    <h3>알아두기 · 대푯값과 분포</h3>
+    <p><b>대푯값</b>은 데이터 전체를 숫자 하나로 나타낸 값입니다. <b>평균</b>(모두 더해 개수로 나눈 값), <b>중앙값</b>(크기 순으로 세웠을 때 가운데 값), <b>최빈값</b>(가장 많이 나온 값)이 있습니다.</p>
+    <p>하지만 대푯값만으로는 데이터가 어떻게 <b>퍼져 있는지(분포)</b>를 알 수 없습니다. 학생이 2명뿐인 두 반이 있는데, 1반은 100점과 0점, 2반은 50점과 50점이라면 평균은 둘 다 50점이지만 모습은 전혀 다릅니다. 이 차이를 보려고 <b>사분위수, 분산, 표준편차</b>를 씁니다.</p>
+  </div>
+  <div class="q">
+    <p class="qt" data-n="Q7.">다음 판매량 데이터의 대푯값을 구해 봅시다. <span class="mono">30, 42, 43, 47, 58</span></p>
+    <p>평균 <input class="blank" id="m1" data-ans="44" inputmode="decimal" aria-label="평균"> 중앙값 <input class="blank" id="m2" data-ans="43" inputmode="decimal" aria-label="중앙값"></p>
+    <div class="check"><button type="button" data-check="m1,m2">정답 확인</button><span class="result" id="r-m1"></span></div>
+  </div>
+
+  <h3>① Box Plot: 퍼진 정도 보기</h3>
+  <ol class="steps">
+    <li>File에 <b>Box Plot</b>을 연결하고 변수에서 <code>판매량</code>을 고릅니다.</li>
+    <li>File을 하나 더 놓고 아래 주소(판매량이 다른 데이터)를 불러와 Box Plot을 또 연결합니다.<br><code id="dataUrl2">https://gus-wn.github.io/orange3_mintea/data/lemonade2.csv</code> <button type="button" class="copyurl" data-target="dataUrl2" style="font-size:.9rem;padding:0 10px">주소 복사</button></li>
+    <li>두 상자 그림을 비교합니다. 파란 막대 위의 <code>44 ± 2.8</code>은 평균과 표준편차, 노란 선은 중앙값입니다.</li>
+  </ol>
+  <div class="figs">
+    <figure class="fig"><img src="img/o3-boxplot.jpg" alt="두 데이터의 Box Plot 비교"><figcaption>평균은 44로 같지만 퍼진 정도가 다른 두 데이터</figcaption></figure>
+    <figure class="fig"><img src="img/o3-boxplot-draw.jpg" alt="상자 그림 설명 그림"><figcaption>각 값이 상자 그림의 어디에 놓이는지 나타낸 그림 (생활코딩)</figcaption></figure>
+  </div>
+  <div class="q">
+    <p class="qt" data-n="Q8.">두 데이터는 평균이 44로 같습니다. 상자 그림에서 무엇이 달랐나요? 레모네이드 가게 주인이라면 어느 쪽이 재료를 준비하기 쉬울지도 함께 써 봅시다.</p>
+    <textarea id="q8" aria-label="Q8 답"></textarea>
+    <details class="hint"><summary>힌트</summary>±뒤의 숫자(표준편차)와 상자의 길이를 비교해 보세요. 매일 판매량이 비슷한 가게와 들쭉날쭉한 가게 중 어디가 계획을 세우기 쉬울까요?</details>
+  </div>
+
+  <h3>② Scatter Plot: 관계 보기</h3>
+  <div class="read"><p>File에 <b>Scatter Plot</b>을 연결하고 x축을 <code>온도</code>, y축을 <code>판매량</code>으로 바꿔 봅니다. 산점도로는 두 값의 관계, 다른 점들과 동떨어진 <b>이상치</b>, 점이 모여 있는 <b>군집</b>을 볼 수 있습니다.</p></div>
+  <figure class="fig narrow"><img src="img/o3-scatter.jpg" alt="Scatter Plot 화면"><figcaption>Scatter Plot</figcaption></figure>
+  <div class="q">
+    <p class="qt" data-n="Q9.">온도와 판매량을 산점도로 그리면 점들이 어떤 모양으로 놓이나요?</p>
+    <p><select id="sc" data-ans="오른쪽 위로 올라가는 직선" aria-label="산점도 모양"><option value="">선택</option><option>오른쪽 위로 올라가는 직선</option><option>오른쪽 아래로 내려가는 직선</option><option>아무렇게나 흩어짐</option></select></p>
+    <div class="check"><button type="button" data-check="sc">정답 확인</button><span class="result" id="r-sc"></span></div>
+  </div>
+</section>
+
+<!-- 활동 5 머신러닝 -->
+<section class="act">
+  <div class="act-h"><span class="no">활동 5</span><h2>온도로 판매량 예측하기</h2><span class="tool">Linear Regression · Predictions</span></div>
+  <div class="concept">
+    <h3>알아두기 · 원인과 결과</h3>
+    <p>원인이 되는 값을 <b>독립변수</b>, 결과가 되는 값을 <b>종속변수</b>라고 합니다. 이미 있는 원인과 결과로 규칙을 배우게 한 뒤, 새로운 원인만 주고 결과를 맞히게 하는 것이 머신러닝의 <b>지도학습</b>입니다. 결과가 숫자이면 <b>회귀</b>라고 부릅니다.</p>
+    <p>오렌지3에서는 File 위젯의 Columns에서 각 열의 <b>Role(역할)</b>을 정합니다.</p>
+  </div>
+  <div class="q">
+    <p class="qt" data-n="Q10.">Role과 뜻을 알맞게 연결해 봅시다.</p>
+    <div class="tbl"><table><tbody id="roleRows"></tbody></table></div>
+    <div class="check"><button type="button" data-check-group="role">정답 확인</button><span class="result" id="r-role"></span></div>
+  </div>
+  <ol class="steps">
+    <li>처음 File을 더블클릭해 Role을 <code>날짜</code> meta, <code>온도</code> feature, <code>판매량</code> target, <code>오픈시간</code>·<code>요일</code> skip으로 바꿉니다.</li>
+    <li>Model 묶음의 <b>Linear Regression</b>을 File에 연결합니다. 이제 모델이 온도와 판매량 사이의 규칙을 배웁니다.</li>
+    <li>새 File을 하나 놓고 예측할 날의 데이터를 불러옵니다. 판매량이 없는 데이터입니다.<br><code id="dataUrl3">https://gus-wn.github.io/orange3_mintea/data/lemonade-new.csv</code> <button type="button" class="copyurl" data-target="dataUrl3" style="font-size:.9rem;padding:0 10px">주소 복사</button></li>
+    <li>Evaluate 묶음의 <b>Predictions</b>에 새 File(Data)과 Linear Regression(Model)을 연결하고, 뒤에 Data Table을 붙여 예측값을 확인합니다.</li>
+  </ol>
+  <div class="figs">
+    <figure class="fig"><img src="img/o3-roles-train.jpg" alt="File 위젯에서 Role 설정"><figcaption>학습용 File: 판매량을 target으로</figcaption></figure>
+    <figure class="fig"><img src="img/o3-predict-flow.jpg" alt="Predictions 워크플로"><figcaption>Linear Regression과 새 File을 Predictions에 연결</figcaption></figure>
+  </div>
+  <div class="q">
+    <p class="qt" data-n="Q11.">Predictions 결과를 적어 봅시다.</p>
+    <div class="tbl"><table>
+      <thead><tr><th>온도</th><th class="num">예측한 판매량</th></tr></thead>
+      <tbody>
+        <tr><td>25도</td><td class="num"><input class="blank" id="p1" data-ans="50|50.0" inputmode="decimal" aria-label="25도 예측"></td></tr>
+        <tr><td>28도</td><td class="num"><input class="blank" id="p2" data-ans="56|56.0" inputmode="decimal" aria-label="28도 예측"></td></tr>
+        <tr><td>30도</td><td class="num"><input class="blank" id="p3" data-ans="60|60.0" inputmode="decimal" aria-label="30도 예측"></td></tr>
+      </tbody>
+    </table></div>
+    <div class="check"><button type="button" data-check="p1,p2,p3">정답 확인</button><span class="result" id="r-p1"></span></div>
+  </div>
+  <div class="q">
+    <p class="qt" data-n="Q12.">온도가 40도인 날에도 이 모델의 예측을 믿을 수 있을까요? 이유와 함께 써 봅시다.</p>
+    <textarea id="q12" aria-label="Q12 답"></textarea>
+    <details class="hint"><summary>힌트</summary>모델은 20~24도인 5일만 보고 배웠습니다. 너무 더운 날에는 사람들이 밖에 나오지 않을 수도 있습니다.</details>
+  </div>
+</section>
+
+<!-- 정리 -->
+<section class="act">
+  <div class="act-h"><span class="no">정리하기</span><h2>오늘 배운 것</h2></div>
+  <div class="concept">
+    <h3>표 → 시각화 → 머신러닝</h3>
+    <p>오늘은 표를 고르고 고치기(Select Rows, Select Columns, Feature Constructor), 통계와 그래프(Box Plot, Scatter Plot), 예측(Linear Regression, Predictions)을 모두 위젯 연결만으로 해 보았습니다. 1번 학습지에서는 같은 방법으로 실제 한국인 소득 데이터를 예측합니다.</p>
+  </div>
+  <div class="q">
+    <p class="qt" data-n="Q13.">오늘 활동을 입력 · 처리 · 출력으로 나눠 정리해 봅시다.</p>
+    <textarea id="q13" aria-label="Q13 답" placeholder="입력: &#10;처리: &#10;출력: "></textarea>
+  </div>
+  <div class="q">
+    <p class="qt" data-n="자기평가">해당하는 만큼 별을 눌러 봅시다.</p>
+    <div class="self" id="self"></div>
+  </div>
+</section>
+
+<footer class="foot">
+  <span>밍티의 AI 교실 · 학습지 0 · 참고: 생활코딩 머신러닝 야학, paul lab 「Orange3로 해보는 데이터 분석」</span>
+  <div class="btns"><span class="toast" id="toast" aria-live="polite"></span><button type="button" id="pdfBtn" class="pdf">PDF로 내려받기</button><button type="button" id="copyAll">답안 복사하기</button><button type="button" id="clearAll">모두 지우기</button></div>
+</footer>
+</div>
+
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const KEY="orange3-data-ws-v1";
+  let store={};try{store=JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){}
+  const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}};
+  const norm=s=>String(s).trim().toLowerCase().replace(/\s+/g,"");
+
+  // 생성 문항
+  const cats=[["Data","데이터를 불러오고 표로 보기"],["Visualize","그래프로 그려 보기"],["Model","학습 방법(알고리즘) 고르기"],["Evaluate","모델 성능을 평가하고 비교하기"]];
+  const catOpts=cats.map(c=>c[1]);
+  $("catRows").innerHTML=cats.map(([c,a])=>`<tr><td class="tag" style="width:7em">${c}</td><td><select id="cat-${c}" data-ans="${a}" aria-label="${c} 하는 일"><option value="">하는 일 고르기</option>${catOpts.map(o=>`<option>${o}</option>`).join("")}</select></td></tr>`).join("");
+  const roles=[["feature","원인이 되는 값 (독립변수)"],["target","예측하려는 값 (종속변수)"],["meta","분석에는 안 쓰지만 참고로 남겨 둘 값 (예: 날짜)"],["skip","무시해도 되는 값"]];
+  const roleOpts=roles.map(r=>r[1]);
+  $("roleRows").innerHTML=roles.map(([r,a])=>`<tr><td class="tag" style="width:6em">${r}</td><td><select id="role-${r}" data-ans="${a}" aria-label="${r} 뜻"><option value="">뜻 고르기</option>${roleOpts.map(o=>`<option>${o}</option>`).join("")}</select></td></tr>`).join("");
+  const selfItems=["Orange3를 실행하고 위젯을 연결해 데이터를 불러올 수 있다.","표를 고르고 고치며 Box Plot으로 분포를 비교할 수 있다.","Linear Regression으로 새 데이터를 예측할 수 있다."];
+  $("self").innerHTML=selfItems.map((t,i)=>`<div class="row"><span>${t}</span><div class="stars" data-i="${i}">${[1,2,3,4,5].map(n=>`<button type="button" data-n="${n}" aria-label="${n}점">★</button>`).join("")}</div></div>`).join("");
+
+  // 저장/복원
+  const fields=()=>document.querySelectorAll(".sheet input, .sheet textarea, .sheet select");
+  fields().forEach(el=>{
+    const k=el.id;if(!k)return;
+    if(k in store){el.type==="checkbox"?el.checked=!!store[k]:el.value=store[k];}
+    el.addEventListener(el.tagName==="SELECT"||el.type==="checkbox"?"change":"input",()=>{store[k]=el.type==="checkbox"?el.checked:el.value;el.classList.remove("ok","no-");save();});
+  });
+  const paintStars=()=>document.querySelectorAll(".stars").forEach(s=>{const v=store["self"+s.dataset.i]||0;s.querySelectorAll("button").forEach(b=>b.classList.toggle("on",+b.dataset.n<=v))});
+  document.querySelectorAll(".stars").forEach(s=>s.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;store["self"+s.dataset.i]=+b.dataset.n;save();paintStars();}));
+  paintStars();
+
+  // 채점
+  const mark=(el,ok)=>{el.classList.toggle("ok",ok);el.classList.toggle("no-",!ok);return ok};
+  const report=(id,g,t)=>{$(id).textContent=`${t}개 중 ${g}개 맞았어요.`+(g===t?" 잘했어요!":" 빨간 칸을 다시 확인해 보세요.")};
+  const isRight=el=>el.dataset.ans.split("|").map(norm).includes(norm(el.value));
+  document.querySelectorAll("[data-check]").forEach(btn=>btn.addEventListener("click",()=>{
+    const ids=btn.dataset.check.split(",");let g=0;ids.forEach(id=>{if(mark($(id),isRight($(id))))g++});report("r-"+ids[0],g,ids.length);
+  }));
+  document.querySelectorAll("[data-check-group]").forEach(btn=>btn.addEventListener("click",()=>{
+    const p=btn.dataset.checkGroup;const els=[...document.querySelectorAll(`select[id^="${p}-"]`)];let g=0;els.forEach(el=>{if(mark(el,isRight(el)))g++});report("r-"+p,g,els.length);
+  }));
+
+  document.querySelectorAll(".copyurl").forEach(b=>b.addEventListener("click",()=>{const t=$(b.dataset.target).textContent;
+    const done=()=>{b.textContent="복사됨";setTimeout(()=>b.textContent="주소 복사",1500)};
+    try{navigator.clipboard.writeText(t).then(done,()=>{const r=document.createRange();r.selectNodeContents($(b.dataset.target));getSelection().removeAllRanges();getSelection().addRange(r)})}catch(e){}}));
+  // 복사·지우기·PDF
+  const toast=m=>{$("toast").textContent=m;setTimeout(()=>$("toast").textContent="",2500)};
+  $("copyAll").onclick=()=>{
+    const lines=[`[Orange3 시작하기 학습지] ${$("sid").value} ${$("sname").value} (${$("sdate").value})`];
+    fields().forEach(el=>{if(!el.id||["sid","sname","sdate"].includes(el.id))return;const label=el.getAttribute("aria-label")||el.closest("label")?.textContent.trim()||el.id;
+      const v=el.type==="checkbox"?(el.checked?"예":"아니오"):el.value;lines.push(`${label}: ${v}`)});
+    lines.push("자기평가: "+selfItems.map((t,i)=>(store["self"+i]||0)+"점").join(", "));
+    const text=lines.join("\n");
+    const fallback=()=>{const ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");toast("복사했어요")}catch(e){toast("복사가 안 되면 직접 선택해 주세요")}ta.remove()};
+    try{navigator.clipboard.writeText(text).then(()=>toast("복사했어요. 제출 칸에 붙여 넣으세요"),fallback)}catch(e){fallback()}
+  };
+  let armed=false;
+  $("clearAll").onclick=()=>{
+    if(!armed){armed=true;$("clearAll").textContent="한 번 더 누르면 지워져요";setTimeout(()=>{armed=false;$("clearAll").textContent="모두 지우기"},3000);return}
+    store={};save();fields().forEach(el=>{el.type==="checkbox"?el.checked=false:el.value="";el.classList.remove("ok","no-")});
+    document.querySelectorAll(".result").forEach(r=>r.textContent="");paintStars();armed=false;$("clearAll").textContent="모두 지우기";toast("모두 지웠어요");
+  };
+  $("pdfBtn").onclick=async()=>{
+    const btn=$("pdfBtn");btn.disabled=true;btn.textContent="PDF 만드는 중…";
+    const who=[$("sid").value.trim(),$("sname").value.trim()].filter(Boolean).join("_")||"학습지";
+    const opt={margin:[10,8,10,8],filename:`${who}_Orange3데이터분석.pdf`,image:{type:"jpeg",quality:0.92},
+      html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",scrollX:0,scrollY:0,onclone:doc=>{
+        doc.body.classList.add("pdfmode");
+        doc.querySelectorAll("input").forEach(i=>{const o=document.getElementById(i.id);if(!o)return;if(i.type==="checkbox")i.checked=o.checked;else{i.value=o.value;i.setAttribute("value",o.value)}});
+        doc.querySelectorAll("textarea").forEach(t=>{const o=document.getElementById(t.id);const d=doc.createElement("div");d.className="ta-print";d.textContent=(o?o.value:t.value)||" ";t.replaceWith(d)});
+        doc.querySelectorAll("select").forEach(s=>{const o=document.getElementById(s.id);const sp=doc.createElement("span");sp.className="sel-print";sp.textContent=(o?o.value:s.value)||"(선택 안 함)";s.replaceWith(sp)});
+        doc.querySelectorAll(".mock .canvas").forEach(c=>c.style.background="#f7f9fa");
+      }},
+      jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},
+      pagebreak:{mode:["css","legacy"],avoid:[".q",".concept","tr",".act-h",".flow",".mock"]}};
+    try{
+      if(!window.html2pdf)throw new Error("no lib");
+      const sy=window.scrollY;window.scrollTo(0,0);
+      await html2pdf().set(opt).from(document.querySelector(".sheet")).save();
+      window.scrollTo(0,sy);toast("PDF를 내려받았어요");
+    }catch(e){toast("인쇄 창에서 'PDF로 저장'을 골라 주세요");try{window.print()}catch(_){}}
+    finally{btn.disabled=false;btn.textContent="PDF로 내려받기"}
+  };
+})();
+</script>
+</body>
+</html>
