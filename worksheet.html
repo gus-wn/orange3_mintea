@@ -90,6 +90,8 @@ td input.blank{width:6em}
 /* 개념 상자 */
 .concept{border:1.5px solid var(--teal);border-radius:6px;padding:16px 18px;display:grid;gap:10px}
 .concept h3{font-size:1.35rem;color:var(--teal)}
+.concept ul.roles{margin:0;padding-left:1.2em;display:grid;gap:6px}
+.concept .analogy{background:var(--memo);border-radius:4px;padding:10px 14px}
 .two{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
 .demo{display:grid;grid-template-columns:minmax(0,1fr) 210px;gap:16px;align-items:center}
 .demo canvas{width:100%;max-width:100%;aspect-ratio:4/3;background:#f6f8f9;border-radius:4px;display:block}
@@ -216,6 +218,17 @@ button:disabled{opacity:.6;cursor:wait}
   <div class="figs">
     <figure class="fig"><img src="img/file-widget.jpg" alt="File 위젯 화면"><figcaption>File 위젯으로 데이터 불러오기</figcaption></figure>
     <figure class="fig"><img src="img/datatable.jpg" alt="Data Table 화면"><figcaption>Data Table에서 Visualize numeric values 켜기</figcaption></figure>
+  </div>
+  <div class="concept">
+    <h3>알아두기 · 데이터의 역할(Role) 정하기</h3>
+    <p>머신러닝 모델에게 데이터를 줄 때는 각 열이 <b>무슨 역할을 하는지</b> 먼저 알려 줘야 합니다. 오렌지3에서는 File 위젯의 Columns 목록에서 Role 칸을 바꿔 정합니다.</p>
+    <ul class="roles">
+      <li><b>target (예측할 값)</b>: 모델이 맞혀야 하는 정답입니다. '결과'에 해당하고 <b>종속변수</b>라고도 부릅니다. 이 학습지에서는 <b>소득(income)</b>이 target입니다. target은 보통 하나만 정합니다.</li>
+      <li><b>feature (원인)</b>: 정답을 맞히는 데 쓰는 단서입니다. '원인'에 해당하고 <b>독립변수</b>라고도 부릅니다. 이 학습지에서는 학력, 가족 수, 태어난 해, 결혼 상태, 성별, 지역, 종교가 feature입니다. 모델은 feature와 target 사이의 규칙을 찾아 배웁니다.</li>
+      <li><b>skip (사용 안 함)</b>: 예측에 도움이 안 되거나 오히려 방해가 되는 열입니다. <b>id(연구대상자 번호)</b>는 사람마다 붙인 일련번호일 뿐이라 소득과 아무 관계가 없으므로 skip으로 둡니다.</li>
+      <li><b>meta (참고용)</b>: 학습에는 쓰지 않지만 표에 남겨 두고 싶은 값입니다. 예를 들어 날짜나 이름처럼 데이터를 알아보는 데만 쓰는 열을 meta로 둡니다.</li>
+    </ul>
+    <p class="analogy"><b>쉽게 말해</b> 시험에 비유하면 feature는 <b>문제</b>, target은 <b>정답</b>입니다. 모델은 문제와 정답을 함께 보며 공부하고(학습), 나중에는 문제만 보고 정답을 맞힙니다(예측). 수험번호(id)는 문제를 푸는 데 아무 도움이 안 되니 빼 두는 것과 같습니다.</p>
   </div>
   <div class="q">
     <p class="qt" data-n="Q3.">각 속성의 Role을 골라 봅시다. (예측할 값 = target, 원인 = feature, 사용 안 함 = skip)</p>
