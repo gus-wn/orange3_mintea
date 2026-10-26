@@ -324,11 +324,31 @@ button:disabled{opacity:.6;cursor:wait}
     <div class="check"><button type="button" data-check="k1,k2,k3">정답 확인</button><span class="result" id="r-k"></span></div>
   </div>
 
-  <h3>② Correlations와 Scatter Plot</h3>
+  <h3>② Correlations와 Scatter Plot: 숫자로 보고, 그림으로 확인하기</h3>
+  <div class="read">
+    <p><b>Correlations</b>는 두 속성이 <b>함께 움직이는 정도(상관계수)</b>를 계산해 줍니다.</p>
+  </div>
+  <ul class="plain">
+    <li>맨 위 칸은 <b>Pearson</b>으로 둡니다.</li>
+    <li>둘째 칸에서 <b>income</b>을 고르면 소득과 관련된 결과만 보입니다.</li>
+    <li>막대가 길수록 관계가 강합니다.</li>
+    <li>숫자 앞의 <b>+</b>는 "하나가 커지면 다른 것도 커진다", <b>−</b>는 "하나가 커지면 다른 것은 작아진다"는 뜻입니다.</li>
+    <li>성별, 종교처럼 <b>숫자가 아니라 종류를 나타내는 속성</b>은 계산하지 않아서 목록에 나오지 않습니다.</li>
+  </ul>
   <div class="figs">
     <figure class="fig"><img src="img/correlations.jpg" alt="Correlations 위젯 결과"><figcaption>Correlations (Pearson, income 기준)</figcaption></figure>
     <figure class="fig"><img src="img/edit-links.jpg" alt="Edit Links 창"><figcaption>Correlations → Scatter Plot 연결 (Data↔Data, Features↔Features)</figcaption></figure>
   </div>
+  <div class="read">
+    <p><b>Scatter Plot</b>은 사람 한 명을 점 하나로 찍어서 두 속성의 관계를 <b>그림</b>으로 보여 줍니다.</p>
+  </div>
+  <ul class="plain">
+    <li>Correlations와 Scatter Plot을 이은 선을 더블클릭하고 <b>Data는 Data에, Features는 Features에</b> 연결해 주세요. 그러면 Correlations에서 한 줄을 누를 때마다 산점도가 그 두 속성으로 바로 바뀝니다.</li>
+    <li><b>Show regression line</b>을 켜면 점들 사이로 선이 그어지고 <b>r 값</b>이 나옵니다. 이 값은 Correlations에서 본 숫자와 같습니다.</li>
+    <li>학력이나 가족 수는 1, 2, 3처럼 딱 떨어지는 숫자라서 점이 한 줄로 겹칩니다. <b>Jittering</b>을 조금 올리고 <b>Jitter numeric values</b>를 켜면 점이 살짝 흩어져서 몇 명이 모여 있는지 보입니다.</li>
+    <li>마우스로 점을 드래그해서 고르면 그 사람들만 따로 볼 수 있습니다. 소득이 −40,000 근처에 혼자 떨어진 점을 골라 어떤 데이터인지 확인해 보세요.</li>
+  </ul>
+  <p class="tip"><b>정리</b> Rank와 Correlations는 관계를 <b>숫자</b>로, Scatter Plot은 <b>그림</b>으로 보여 줍니다. 숫자만 보지 말고 그림으로 한 번 더 확인하면, 혼자 튀는 점(이상치)처럼 숫자로는 안 보이던 것을 찾을 수 있어요.</p>
   <div class="figs">
     <figure class="fig"><img src="img/sc-family.jpg" alt="family_member 산점도"><figcaption>[그림 2-3] family_member</figcaption></figure>
     <figure class="fig"><img src="img/sc-edu.jpg" alt="education_level 산점도"><figcaption>[그림 2-5] education_level</figcaption></figure>
