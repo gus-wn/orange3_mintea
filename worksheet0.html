@@ -8,6 +8,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
+@font-face{font-family:"BM Kkubulim";src:url("fonts/BMKkubulim.woff2") format("woff2");font-weight:normal;font-style:normal;font-display:swap}
 @font-face{font-family:"ChosunMyungjoEmbed";src:url("fonts/ChosunilboMyungjo.woff") format("woff");font-display:swap}
 @font-face{font-family:"KkubulimLocal";src:local("꾸불림체"),local("꾸불림"),local("Kkubulim")}
 /* Layout: 1번 학습지와 같은 A4 종이 한 장. 위젯 연결도는 오렌지3 캔버스를 본뜬 작은 그림으로 그린다. */
@@ -17,7 +18,7 @@
   --orange:#d4621a; --orange-soft:#fdeee3; --teal:#17697a; --teal-soft:#e2f0f2;
   --ok-soft:#e5f3e8; --no-soft:#fbe7e1; --memo:#fff7d6;
   --w-data:#f6b26b; --w-vis:#f4a6a6; --w-model:#e8a3d6; --w-eval:#9fd8e0;
-  --hand:"KkubulimLocal","꾸불림체","Gaegu","ChosunMyungjoEmbed",cursive;
+  --hand:"BM Kkubulim","꾸불림체","Gaegu","ChosunMyungjoEmbed",cursive;
   --serif:"조선일보명조","Chosunilbo_myungjo","ChosunMyungjoEmbed","Nanum Myeongjo","AppleMyungjo","Batang",serif;
   --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
 }
@@ -25,7 +26,7 @@
 body{margin:0;background:var(--desk);color:var(--ink);font-family:var(--serif);font-size:16.5px;line-height:1.75;word-break:keep-all;overflow-wrap:anywhere;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:calc(env(safe-area-inset-top,0px) + 28px) calc(env(safe-area-inset-bottom,0px) + 64px)}
 .sheet{max-width:860px;margin:0 auto;background:var(--paper);border-radius:4px;box-shadow:0 1px 3px rgba(20,30,40,.12),0 12px 32px rgba(20,30,40,.08);padding:clamp(20px,5vw,56px);display:grid;gap:44px}
-h1,h2,h3{font-family:var(--hand);font-weight:700;margin:0;text-wrap:balance;line-height:1.25}
+h1,h2,h3{font-family:var(--hand);font-weight:400;margin:0;text-wrap:balance;line-height:1.25}
 p{margin:0}
 code,.mono{font-family:var(--mono);font-size:.86em}
 code{background:var(--teal-soft);color:var(--teal);padding:0 5px;border-radius:3px}

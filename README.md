@@ -19,3 +19,7 @@
 - `fonts/` 갈무리11 (SIL Open Font License 1.1, https://galmuri.quiple.dev)
 
 밍티 캐릭터 © gus-wn
+
+### 글꼴 라이선스
+- `fonts/BMKkubulim.woff2` 꾸불림체 (배달의민족 무료 글꼴, KS X 1001 한글 2,350자 등으로 줄인 웹용 파일). 영리·비영리 목적으로 자유롭게 사용·수정할 수 있으며 글꼴 파일 자체의 유상 판매는 금지됩니다. https://www.woowahan.com/fonts
+- `fonts/ChosunilboMyungjo.woff` 조선일보명조
