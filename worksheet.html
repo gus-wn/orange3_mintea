@@ -85,6 +85,9 @@ th{background:#f2f5f7;font-weight:700;font-size:.82rem}
 tr:last-child td{border-bottom:0}
 td.num,th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
 td input.blank{width:6em}
+ul.plain{margin:0;padding-left:1.3em;display:grid;gap:6px}
+.tip{background:var(--memo);border-radius:4px;padding:10px 14px;font-size:.95rem}
+.tip b:first-child{font-family:var(--hand);color:var(--orange);font-weight:400;font-size:1.1rem;margin-right:6px}
 table.zones td:first-child{width:3.5em;text-align:center;font-family:var(--hand);font-size:1.15rem;color:var(--orange)}
 table.zones td:nth-child(2){width:28%}
 .tag{font-family:var(--mono);font-size:.82rem}
@@ -301,7 +304,19 @@ button:disabled{opacity:.6;cursor:wait}
     <p class="result">상관관계가 있다고 해서 원인과 결과(인과관계)까지 알 수 있는 것은 아닙니다.</p>
   </div>
 
-  <h3>① Rank</h3>
+  <h3>① Rank: 소득과 가장 관련 있는 속성은?</h3>
+  <div class="read">
+    <p><b>Rank</b>는 속성마다 점수를 매겨 <b>소득과 관련이 큰 순서대로 줄을 세워 주는</b> 위젯입니다. 반에서 성적순으로 순위를 매기는 것과 비슷합니다.</p>
+    <p>점수를 매기는 방법은 두 가지입니다.</p>
+  </div>
+  <ul class="plain">
+    <li><b>Univariate Regression</b>: 속성 하나만 가지고 소득을 맞혀 봅니다. 잘 맞힐수록 점수가 높습니다.</li>
+    <li><b>RReliefF</b>: 나와 비슷한 사람들을 찾아 비교합니다. "이 속성이 다르면 소득도 달라질까?"를 확인해서, 그렇다면 점수가 높습니다.</li>
+  </ul>
+  <div class="read">
+    <p>점수는 0에 가까운 작은 숫자로 나오지만 괜찮습니다. <b>누가 더 높은지 순서만</b> 보면 됩니다. Univariate Regression 칸에 NA라고 나오면 RReliefF 점수를 보세요. 우리 데이터에서는 어떤 순서일까요? 아래 Q4에서 직접 확인해 봅시다.</p>
+  </div>
+  <p class="tip"><b>꿀팁</b> 왼쪽 아래에서 <b>Best ranked</b>를 고르고 숫자 3을 넣으면, 1~3등 속성만 골라 다음 위젯으로 보낼 수 있어요.</p>
   <figure class="fig narrow"><img src="img/rank.jpg" alt="Rank 위젯 결과"><figcaption>Rank 위젯 (RReliefF 점수)</figcaption></figure>
   <div class="q">
     <p class="qt" data-n="Q4.">RReliefF 점수가 높은 속성 3개를 순서대로 써 봅시다.</p>
