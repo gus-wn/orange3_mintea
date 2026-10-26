@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>신상정보로 소득 예측하기</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: 오렌지3 위젯 흐름을 따라 내려가는 한 장짜리 수업 노트. 왼쪽 단계 레일 + 본문, 좁으면 한 단 */
+:root{
+  --bg:#f6f7f8; --paper:#ffffff; --ink:#18242c; --muted:#5b6a73; --line:#dde3e7;
+  --orange:#d9661f; --orange-soft:#fbe9dc; --teal:#1d6f7d; --teal-soft:#dcedf0;
+  --pos:#1d6f7d; --neg:#c2410c; --warn-bg:#fff4e0; --warn-ink:#7a4a00;
+  --display:"Do Hyeon","IBM Plex Sans KR",system-ui,sans-serif;
+  --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#11181d; --paper:#18222a; --ink:#e6ecef; --muted:#9aa9b2; --line:#2a3741;
+  --orange:#f08a45; --orange-soft:#3a2617; --teal:#5fb7c6; --teal-soft:#16343a;
+  --pos:#5fb7c6; --neg:#f08a45; --warn-bg:#3a2d12; --warn-ink:#f3cf88; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11181d; --paper:#18222a; --ink:#e6ecef; --muted:#9aa9b2; --line:#2a3741;
+  --orange:#f08a45; --orange-soft:#3a2617; --teal:#5fb7c6; --teal-soft:#16343a;
+  --pos:#5fb7c6; --neg:#f08a45; --warn-bg:#3a2d12; --warn-ink:#f3cf88; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.7;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 64px}
+.wrap{max-width:1080px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);font-weight:400;text-wrap:balance;line-height:1.25;margin:0}
+h2{font-size:1.9rem}
+h3{font-size:1.3rem;margin-top:8px}
+p{margin:0}
+.mono{font-family:var(--mono)}
+code{font-family:var(--mono);font-size:.88em;background:var(--teal-soft);color:var(--teal);padding:1px 6px;border-radius:4px}
+
+/* hero */
+header.hero{padding-block:56px 36px;display:grid;gap:18px;border-bottom:1px solid var(--line)}
+.kicker{font-size:.8rem;letter-spacing:.12em;color:var(--orange);font-weight:700}
+.hero h1{font-size:clamp(2.1rem,5.5vw,3.4rem);max-width:18ch}
+.hero .lead{max-width:62ch;color:var(--muted);font-size:1.05rem}
+.facts{display:flex;flex-wrap:wrap;gap:8px 24px;font-size:.9rem;color:var(--muted)}
+.facts b{color:var(--ink);font-weight:500}
+
+/* layout */
+.grid{display:grid;grid-template-columns:200px minmax(0,1fr);gap:48px;margin-top:40px}
+nav.rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start}
+nav.rail ol{list-style:none;margin:0;padding:0;display:grid;gap:2px;counter-reset:s}
+nav.rail a{display:flex;gap:10px;align-items:baseline;padding:6px 10px;border-radius:6px;color:var(--muted);text-decoration:none;font-size:.92rem}
+nav.rail a:hover,nav.rail a:focus-visible{background:var(--paper);color:var(--ink);outline:none}
+nav.rail a span{font-family:var(--mono);font-size:.78rem;color:var(--orange)}
+main{display:grid;gap:64px;min-width:0}
+section{display:grid;gap:18px;scroll-margin-top:24px}
+.step-tag{font-family:var(--mono);font-size:.8rem;color:var(--orange);letter-spacing:.05em}
+.prose{display:grid;gap:12px;max-width:68ch}
+
+/* pipeline */
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.node{display:flex;align-items:center;gap:8px;background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:6px 14px 6px 6px;font-size:.88rem}
+.node i{width:26px;height:26px;border-radius:50%;background:var(--orange-soft);color:var(--orange);display:grid;place-items:center;font-style:normal;font-family:var(--mono);font-size:.75rem}
+.arrow{color:var(--muted)}
+
+/* tables */
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--paper)}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.78rem;letter-spacing:.06em;color:var(--muted);font-weight:500;background:var(--bg)}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.drop td{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--line)}
+tr.target td{background:var(--orange-soft)}
+.pill{display:inline-block;font-size:.72rem;padding:1px 8px;border-radius:999px;border:1px solid currentColor;white-space:nowrap}
+.pill.t{color:var(--orange)} .pill.f{color:var(--teal)} .pill.s{color:var(--muted)}
+.best{font-weight:700;color:var(--teal)}
+
+/* notes */
+.note{background:var(--warn-bg);color:var(--warn-ink);border-radius:10px;padding:14px 18px;font-size:.93rem;display:grid;gap:6px;max-width:72ch}
+.note strong{font-weight:700}
+.concept{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:20px 22px;display:grid;gap:12px}
+.concept .lbl{font-size:.75rem;letter-spacing:.12em;color:var(--teal);font-weight:700}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+
+/* correlation bars */
+.bars{display:grid;gap:10px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:20px}
+.bar{display:grid;grid-template-columns:130px 1fr 64px;gap:12px;align-items:center;font-size:.88rem}
+.bar .name{font-family:var(--mono);font-size:.82rem;overflow-wrap:anywhere}
+.track{position:relative;height:18px;background:linear-gradient(to right,transparent calc(50% - 1px),var(--line) calc(50% - 1px),var(--line) calc(50% + 1px),transparent calc(50% + 1px))}
+.fill{position:absolute;top:2px;height:14px;border-radius:3px}
+.bar .v{font-family:var(--mono);text-align:right;font-variant-numeric:tabular-nums}
+.axis{display:grid;grid-template-columns:130px 1fr 64px;gap:12px;font-family:var(--mono);font-size:.72rem;color:var(--muted)}
+.axis div:nth-child(2){display:flex;justify-content:space-between}
+
+/* demo */
+.demo{display:grid;grid-template-columns:minmax(0,1fr) 240px;gap:20px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:20px;align-items:center}
+.demo canvas{width:100%;max-width:100%;aspect-ratio:4/3;background:var(--bg);border-radius:8px;display:block}
+.demo .ctl{display:grid;gap:10px}
+.demo .r{font-family:var(--mono);font-size:2rem;color:var(--orange)}
+.demo input[type=range]{width:100%;accent-color:var(--orange)}
+.demo button{font:inherit;font-size:.85rem;padding:6px 12px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.demo button:focus-visible,.demo input:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+.scale{font-size:.85rem;color:var(--muted)}
+
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.metric{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:4px}
+.metric b{font-family:var(--mono);color:var(--teal)}
+.metric span{font-size:.88rem;color:var(--muted)}
+
+ol.qs{margin:0;padding-left:1.3em;display:grid;gap:10px;max-width:70ch}
+ol.qs li::marker{font-family:var(--mono);color:var(--orange)}
+footer{margin-top:72px;padding-top:20px;border-top:1px solid var(--line);font-size:.82rem;color:var(--muted);display:grid;gap:4px}
+footer a{color:var(--teal)}
+
+@media (max-width:820px){
+  .grid{grid-template-columns:minmax(0,1fr);gap:24px}
+  nav.rail{position:static}
+  nav.rail ol{display:flex;flex-wrap:wrap;gap:4px}
+  .demo{grid-template-columns:minmax(0,1fr)}
+  .bar,.axis{grid-template-columns:104px 1fr 54px}
+}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+
+.fig{margin:0;display:grid;gap:8px;min-width:0}
+.fig img{width:100%;max-width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:8px;background:#fff}
+.fig figcaption{font-size:.82rem;color:var(--muted)}
+.fig.narrow{max-width:520px}
+.figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;align-items:start}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .fig img{filter:brightness(.92)}}
+:root[data-theme="dark"] .fig img{filter:brightness(.92)}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+<header class="hero">
+  <div class="kicker">데이터 기반 인공지능 · ORANGE3 회귀 실습</div>
+  <h1>개인에 관한 신상정보로 소득 정도를 예측할 수 있을까?</h1>
+  <p class="lead">학력이 소득에 영향을 준다는 건 많이 들어봤지만, 학력만으로 소득이 정해질까요? 한국인의 소득·복지 데이터를 오렌지3로 탐색하고, 세 가지 회귀 모델로 소득을 예측해 봅니다.</p>
+  <div class="facts">
+    <div>데이터 <b>Kaggle · Korea Income and Welfare</b></div>
+    <div>문제 유형 <b>예측(회귀)</b></div>
+    <div>알고리즘 <b>Linear Regression · kNN · Random Forest</b></div>
+    <div>평가 <b>Test and Score</b></div>
+  </div>
+</header>
+
+<div class="grid">
+<nav class="rail" aria-label="학습 단계">
+  <ol>
+    <li><a href="#problem"><span>00</span>문제 상황</a></li>
+    <li><a href="#data"><span>01</span>데이터 준비</a></li>
+    <li><a href="#load"><span>02</span>불러오기</a></li>
+    <li><a href="#explore"><span>03</span>시각화·탐색</a></li>
+    <li><a href="#corr"><span>＋</span>상관계수 개념</a></li>
+    <li><a href="#select"><span>04</span>속성 추출</a></li>
+    <li><a href="#train"><span>05–06</span>학습·평가</a></li>
+    <li><a href="#predict"><span>07</span>예측</a></li>
+    <li><a href="#wrap"><span>✓</span>정리·생각해보기</a></li>
+  </ol>
+</nav>
+
+<main>
+<!-- 문제 상황 -->
+<section id="problem">
+  <div class="step-tag">문제 상황</div>
+  <h2>소득은 무엇으로 결정될까?</h2>
+  <div class="prose">
+    <p>우리 사회는 오랫동안 교육을 통해 소득을 만들 수 있다고 믿어 왔고, 고학력과 학벌이 소득을 좌우한다고 여겨 자녀 교육에 많은 투자를 해 왔습니다.</p>
+    <p>미국 통계를 보면 대학 졸업자의 평균 소득은 전체 근로자 평균보다 높습니다. 학력이 소득에 영향을 주는 건 맞지만, 학력만으로 소득이 정해진다고 보기는 어렵습니다. <b>성별, 가족 구성원 수, 태어난 해, 결혼 여부</b> 같은 다른 정보도 소득에 직간접적으로 영향을 줄 수 있기 때문입니다.</p>
+    <p>이번 시간에는 개인 정보 중 무엇이 소득과 관련 있는지 알아보고, 그 정보로 소득을 예측해 봅니다.</p>
+  </div>
+  <div class="figs"><figure class="fig "><img src="img/kaggle-banner.jpg" alt="Kaggle 「Korea Income and Welfare」 데이터 세트" loading="lazy"><figcaption>Kaggle 「Korea Income and Welfare」 데이터 세트</figcaption></figure><figure class="fig narrow"><img src="img/edu-income.jpg" alt="미국 학력별 평균 연봉 그래프(Education’s effect on income)" loading="lazy"><figcaption>미국 학력별 평균 연봉 그래프(Education’s effect on income)</figcaption></figure></div>
+  <div class="flow" aria-label="학습 진행 과정">
+    <div class="node"><i>1</i>데이터 준비</div><span class="arrow">→</span>
+    <div class="node"><i>2</i>불러오기</div><span class="arrow">→</span>
+    <div class="node"><i>3</i>시각화</div><span class="arrow">→</span>
+    <div class="node"><i>4</i>속성 추출</div><span class="arrow">→</span>
+    <div class="node"><i>5</i>모델 학습</div><span class="arrow">→</span>
+    <div class="node"><i>6</i>성능 평가</div><span class="arrow">→</span>
+    <div class="node"><i>7</i>예측</div>
+  </div>
+</section>
+
+<!-- 데이터 준비 -->
+<section id="data">
+  <div class="step-tag">1단계 · 데이터 준비</div>
+  <h2>개인 소득 데이터 세트</h2>
+  <div class="prose">
+    <p>캐글(Kaggle)은 2010년에 문을 연 예측 모델·데이터 분석 대회 플랫폼입니다. 기업이나 단체가 데이터와 과제를 올리면 데이터 과학자들이 모델을 만들어 경쟁하기 때문에, 기계학습용 데이터를 쉽게 구할 수 있습니다.</p>
+    <p><a href="https://www.kaggle.com" target="_blank" rel="noopener" style="color:var(--teal)">kaggle.com</a>에서 「Korea Income and Welfare」를 검색해 <code>Korea Income and Welfare.csv</code>를 내려받습니다. 2005년부터 2018년까지 14년(14차) 동안 한국인의 소득, 지역, 종교 등을 조사한 자료로, <b>92,877행 × 14개 속성</b>입니다.</p>
+    <p>결측값이 너무 많은 <code>occupation</code>, <code>company_size</code>, <code>reasonnoneworker</code> 3개 속성은 지우고, 가장 최근인 <b>2018년 데이터만</b> 골라 <code>income2018.csv</code>(1,137행)로 저장해 사용합니다.</p>
+  </div>
+  <div class="figs"><figure class="fig "><img src="img/kaggle-page.jpg" alt="[그림 2-1] 캐글에서 제공하는 데이터 세트 페이지" loading="lazy"><figcaption>[그림 2-1] 캐글에서 제공하는 데이터 세트 페이지</figcaption></figure><figure class="fig "><img src="img/kaggle-files.jpg" alt="[그림 2-2] Data 탭에서 내려받을 수 있는 파일 2개" loading="lazy"><figcaption>[그림 2-2] Data 탭에서 내려받을 수 있는 파일 2개</figcaption></figure></div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>속성</th><th>의미</th><th>값</th><th>설명</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">id</td><td>연구대상자 아이디</td><td class="mono">10101~</td><td>순번(예측에 쓰지 않음)</td></tr>
+        <tr><td class="mono">year</td><td>조사 연도</td><td class="mono">2005~2018</td><td>연구를 수행한 해</td></tr>
+        <tr><td class="mono">wave</td><td>차수</td><td class="mono">1~14</td><td>2005년 1차 ~ 2018년 14차</td></tr>
+        <tr><td class="mono">region</td><td>지역</td><td class="mono">1~7</td><td>1 서울 2 경기 3 경남 4 경북 5 충남 6 강원·충북 7 전라·제주</td></tr>
+        <tr class="target"><td class="mono">income</td><td>연간 소득</td><td class="mono">숫자</td><td>예측할 값(target)</td></tr>
+        <tr><td class="mono">family_member</td><td>가족 구성원 수</td><td class="mono">1 이상</td><td></td></tr>
+        <tr><td class="mono">gender</td><td>성별</td><td class="mono">1, 2</td><td>1 남성 2 여성</td></tr>
+        <tr><td class="mono">year_born</td><td>태어난 해</td><td class="mono">1900 이상</td><td></td></tr>
+        <tr><td class="mono">education_level</td><td>학력</td><td class="mono">1~9</td><td>1·2 교육 없음 3 초 4 중 5 고 6 전문대 7 대학 8 석사 9 박사</td></tr>
+        <tr><td class="mono">marriage</td><td>결혼 상태</td><td class="mono">1~6</td><td>1 해당없음(18세 미만) 2 기혼 3 사별 4 별거 5 미혼 6 기타</td></tr>
+        <tr><td class="mono">religion</td><td>종교 유무</td><td class="mono">1, 2</td><td>1 있음 2 없음</td></tr>
+        <tr class="drop"><td class="mono">occupation</td><td>직업 종류</td><td class="mono">149종</td><td>결측 많음 → 삭제</td></tr>
+        <tr class="drop"><td class="mono">company_size</td><td>회사 규모</td><td class="mono">1~11</td><td>결측 많음 → 삭제</td></tr>
+        <tr class="drop"><td class="mono">reasonnoneworker</td><td>미취업 사유</td><td class="mono">1~11</td><td>결측 많음 → 삭제</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note"><strong>소득 단위 확인하기</strong><p>캐글 설명에는 소득 단위가 '백만 원'으로 적혀 있지만, 실제 값(예: 2330, 5008)을 보면 만 원 단위로 읽는 편이 자연스럽습니다. 수업 전에 데이터 값을 직접 열어 보고 학생들과 단위를 함께 확인해 보세요.</p></div>
+</section>
+
+<!-- 불러오기 -->
+<section id="load">
+  <div class="step-tag">2단계 · 데이터 불러오기</div>
+  <h2>File 위젯으로 불러오고 역할 정하기</h2>
+  <div class="prose">
+    <p>① 오렌지3을 실행하고 <b>File</b> 위젯을 캔버스에 놓은 뒤 더블클릭해 <code>income2018.csv</code>를 엽니다.</p>
+    <p>② Columns 목록에서 각 속성의 형식(Type)과 역할(Role)을 정합니다. 결과값인 income은 <span class="pill t">target</span>, id는 <span class="pill s">skip</span>, 나머지는 원인이므로 <span class="pill f">feature</span>로 둡니다.</p>
+    <p>③ <b>Data Table</b> 위젯을 연결해 데이터가 제대로 들어왔는지 확인합니다. <i>Visualize numeric values</i>를 켜면 값의 크기를 막대로 볼 수 있습니다.</p>
+  </div>
+  <div class="figs"><figure class="fig "><img src="img/file-widget.jpg" alt="File 위젯으로 income2018.csv 불러오기" loading="lazy"><figcaption>File 위젯으로 income2018.csv 불러오기</figcaption></figure><figure class="fig "><img src="img/file-columns.jpg" alt="Columns에서 Role 지정: income은 target, id는 skip" loading="lazy"><figcaption>Columns에서 Role 지정: income은 target, id는 skip</figcaption></figure></div>
+  <div class="figs"><figure class="fig "><img src="img/file-datatable.jpg" alt="File 위젯에 Data Table 연결" loading="lazy"><figcaption>File 위젯에 Data Table 연결</figcaption></figure><figure class="fig "><img src="img/datatable.jpg" alt="Data Table에서 Visualize numeric values 켜기" loading="lazy"><figcaption>Data Table에서 Visualize numeric values 켜기</figcaption></figure></div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Name</th><th>Type</th><th>Role</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">id</td><td>numeric</td><td><span class="pill s">skip</span></td></tr>
+        <tr><td class="mono">region</td><td>categorical</td><td><span class="pill f">feature</span></td></tr>
+        <tr class="target"><td class="mono">income</td><td>numeric</td><td><span class="pill t">target</span></td></tr>
+        <tr><td class="mono">family_member</td><td>numeric</td><td><span class="pill f">feature</span></td></tr>
+        <tr><td class="mono">gender</td><td>categorical</td><td><span class="pill f">feature</span></td></tr>
+        <tr><td class="mono">year_born</td><td>numeric</td><td><span class="pill f">feature</span></td></tr>
+        <tr><td class="mono">education_level</td><td>numeric</td><td><span class="pill f">feature</span></td></tr>
+        <tr><td class="mono">marriage</td><td>numeric</td><td><span class="pill f">feature</span></td></tr>
+        <tr><td class="mono">religion</td><td>categorical</td><td><span class="pill f">feature</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 탐색 -->
+<section id="explore">
+  <div class="step-tag">3단계 · 데이터 시각화</div>
+  <h2>어떤 속성이 소득과 관련 있을까?</h2>
+  <div class="prose">
+    <p>분석할 데이터를 여러 관점에서 살펴보고 특성을 이해하는 과정을 <b>데이터 탐색</b>이라고 합니다. 좋은 모델을 만들려면 꼭 거쳐야 하는 단계입니다. File 위젯에 <b>Rank</b>, <b>Correlations</b>, <b>Scatter Plot</b>을 각각 연결해 봅시다.</p>
+  </div>
+  <div class="flow">
+    <div class="node"><i>F</i>File</div><span class="arrow">→</span>
+    <div class="node"><i>R</i>Rank</div>
+    <div class="node"><i>C</i>Correlations → Scatter Plot</div>
+    <div class="node"><i>S</i>Scatter Plot</div>
+  </div>
+  <figure class="fig narrow"><img src="img/explore-flow.jpg" alt="Visualize 팔레트에서 Rank, Correlations, Scatter Plot을 File에 연결" loading="lazy"><figcaption>Visualize 팔레트에서 Rank, Correlations, Scatter Plot을 File에 연결</figcaption></figure>
+
+  <h3>Rank: 속성 순위 매기기</h3>
+  <div class="prose">
+    <p>Rank는 각 속성이 target을 얼마나 잘 설명하는지 점수로 보여 줍니다. 회귀에서는 <b>Univariate Regression</b>(속성 하나로 하는 선형 회귀)과 <b>RReliefF</b>(비슷한 데이터끼리 target 값을 얼마나 잘 구별하는지) 점수를 제공합니다.</p>
+  </div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>속성</th><th class="num">RReliefF</th></tr></thead>
+      <tbody>
+        <tr><td class="mono best">year_born</td><td class="num best">0.110</td></tr>
+        <tr><td class="mono best">education_level</td><td class="num best">0.102</td></tr>
+        <tr><td class="mono best">family_member</td><td class="num best">0.096</td></tr>
+        <tr><td class="mono">region</td><td class="num">0.048</td></tr>
+        <tr><td class="mono">marriage</td><td class="num">0.022</td></tr>
+        <tr><td class="mono">religion</td><td class="num">0.009</td></tr>
+        <tr><td class="mono">gender</td><td class="num">0.000</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <figure class="fig narrow"><img src="img/rank.jpg" alt="Rank 위젯 결과 (RReliefF 점수)" loading="lazy"><figcaption>Rank 위젯 결과 (RReliefF 점수)</figcaption></figure>
+  <p class="prose">year_born, education_level, family_member 순으로 영향이 크고, 나머지는 영향이 작게 나옵니다.</p>
+
+  <h3>Correlations: income과의 상관계수 (Pearson)</h3>
+  <div class="bars" role="img" aria-label="income과 각 속성의 피어슨 상관계수 막대그래프">
+    <div class="axis"><div></div><div><span>−1</span><span>0</span><span>+1</span></div><div></div></div>
+    <div id="bars"></div>
+  </div>
+  <div class="prose">
+    <p>family_member(+0.58)와 education_level(+0.47)은 상관계수의 절댓값이 0.4 이상이고, year_born(−0.398, 반올림하면 −0.40)도 0.4 수준입니다. 태어난 해가 늦을수록(젊을수록) 소득이 낮은 경향이라 음수가 나옵니다. marriage(−0.31)는 약한 상관, region은 거의 상관이 없습니다.</p>
+  </div>
+
+  <div class="figs"><figure class="fig narrow"><img src="img/correlations.jpg" alt="Correlations 위젯 (Pearson, income 기준)" loading="lazy"><figcaption>Correlations 위젯 (Pearson, income 기준)</figcaption></figure></div>
+
+  <h3>Scatter Plot: 산점도로 직접 보기</h3>
+  <div class="prose">
+    <p>Correlations의 출력(Data, Features)을 Scatter Plot에 연결하면 고른 속성 쌍을 바로 산점도로 볼 수 있습니다. Axis x를 <code>income</code>으로 두고 Axis y를 바꿔 가며 <i>Show regression line</i>을 켜 보세요.</p>
+  </div>
+  <div class="figs"><figure class="fig "><img src="img/corr-scatter-flow.jpg" alt="Correlations → Scatter Plot 연결" loading="lazy"><figcaption>Correlations → Scatter Plot 연결</figcaption></figure><figure class="fig "><img src="img/edit-links.jpg" alt="Edit Links: Data↔Data, Features↔Features" loading="lazy"><figcaption>Edit Links: Data↔Data, Features↔Features</figcaption></figure></div>
+  <div class="figs"><figure class="fig "><img src="img/sc-family.jpg" alt="[그림 2-3] family_member (r = 0.58)" loading="lazy"><figcaption>[그림 2-3] family_member (r = 0.58)</figcaption></figure><figure class="fig "><img src="img/sc-edu.jpg" alt="[그림 2-5] education_level (r = 0.47)" loading="lazy"><figcaption>[그림 2-5] education_level (r = 0.47)</figcaption></figure><figure class="fig "><img src="img/sc-yearborn.jpg" alt="[그림 2-4] year_born (r = −0.40)" loading="lazy"><figcaption>[그림 2-4] year_born (r = −0.40)</figcaption></figure><figure class="fig "><img src="img/sc-marriage.jpg" alt="[그림 2-6] marriage (r = −0.31)" loading="lazy"><figcaption>[그림 2-6] marriage (r = −0.31)</figcaption></figure></div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Axis y</th><th class="num">r</th><th>해석</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">family_member</td><td class="num">0.58</td><td>상관관계가 있다</td></tr>
+        <tr><td class="mono">education_level</td><td class="num">0.47</td><td>상관관계가 있다</td></tr>
+        <tr><td class="mono">year_born</td><td class="num">−0.40</td><td>음의 상관관계가 있다</td></tr>
+        <tr><td class="mono">marriage</td><td class="num">−0.31</td><td>약한 음의 상관관계</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note"><strong>산점도에서 눈여겨볼 점</strong><p>income이 −40,000 근처인 점이 하나 보입니다. 소득이 음수인 사람이 있을까요? 이런 이상치가 회귀선을 얼마나 끌어당기는지 학생들과 이야기해 볼 만합니다.</p></div>
+</section>
+
+<!-- 개념 -->
+<section id="corr">
+  <div class="step-tag">AI의 기초 알아보기</div>
+  <h2>상관계수란?</h2>
+  <div class="two">
+    <div class="concept">
+      <div class="lbl">PEARSON 상관</div>
+      <p>두 수치형 변수 사이의 <b>선형</b> 관계를 잽니다. 한 변수가 변할 때 다른 변수가 일정한 비율로 함께 변하면 1이나 −1에 가까워집니다.</p>
+      <p class="scale">예) 생산 설비 온도가 오를 때 초콜릿 코팅 두께가 함께 변하는가?</p>
+    </div>
+    <div class="concept">
+      <div class="lbl">SPEARMAN 순위 상관</div>
+      <p>원래 값 대신 <b>순위</b>로 계산합니다. 함께 늘거나 줄기만 하면, 변하는 비율이 일정하지 않아도 1이나 −1이 됩니다. 순서형 변수에 자주 씁니다.</p>
+      <p class="scale">예) 테스트를 끝낸 순서가 근무 개월 수와 관련 있는가?</p>
+    </div>
+  </div>
+
+  <figure class="fig "><img src="img/pearson-spearman.jpg" alt="Pearson과 Spearman 계수 비교 예시" loading="lazy"><figcaption>Pearson과 Spearman 계수 비교 예시</figcaption></figure>
+  <h3>직접 움직여 보기</h3>
+  <div class="demo">
+    <canvas id="cv" width="640" height="480" aria-label="상관계수에 따라 바뀌는 산점도"></canvas>
+    <div class="ctl">
+      <label for="rs" class="scale">목표 상관계수</label>
+      <input id="rs" type="range" min="-1" max="1" step="0.05" value="0.5">
+      <div>실제 r = <span class="r" id="rv">0.50</span></div>
+      <div class="scale" id="rlabel">상관관계가 있다</div>
+      <button id="again" type="button">점 다시 뽑기</button>
+    </div>
+  </div>
+  <figure class="fig "><img src="img/corr-scale.jpg" alt="상관계수 r 값에 따른 산점도 모양" loading="lazy"><figcaption>상관계수 r 값에 따른 산점도 모양</figcaption></figure>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>|r| 범위</th><th>해석</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">0.0 ~ 0.2</td><td>상관관계가 거의 없다</td></tr>
+        <tr><td class="mono">0.2 ~ 0.4</td><td>상관관계가 낮다</td></tr>
+        <tr><td class="mono">0.4 ~ 0.6</td><td>상관관계가 있다</td></tr>
+        <tr><td class="mono">0.6 ~ 0.8</td><td>상관관계가 높다</td></tr>
+        <tr><td class="mono">0.8 ~ 1.0</td><td>상관관계가 매우 높다</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note"><strong>상관관계 ≠ 인과관계</strong><p>상관계수는 두 변수가 함께 움직이는 정도만 알려 줍니다. 가족 수가 많아서 소득이 높은 것인지, 소득이 높아서 가족을 꾸린 것인지는 상관계수로 알 수 없습니다.</p></div>
+</section>
+
+<!-- 속성 추출 -->
+<section id="select">
+  <div class="step-tag">4단계 · 속성 추출</div>
+  <h2>Select Columns로 학습할 속성 고르기</h2>
+  <div class="prose">
+    <p>탐색 결과 income과 상관관계가 있는 속성은 <code>family_member</code>, <code>year_born</code>, <code>education_level</code>, <code>marriage</code>입니다. 반대로 <code>region</code>, <code>gender</code>, <code>religion</code>은 관계가 거의 없어서 학습에서 뺍니다.</p>
+    <p><b>Select Columns</b> 위젯에서 Features에 4개 속성을, Target Variable에 income을 넣고, Data Table(1)을 연결해 원하는 열만 남았는지 확인합니다.</p>
+  </div>
+  <figure class="fig "><img src="img/select-flow.jpg" alt="Select Columns와 Data Table(1)을 연결한 워크플로" loading="lazy"><figcaption>Select Columns와 Data Table(1)을 연결한 워크플로</figcaption></figure>
+  <figure class="fig "><img src="img/select-columns.jpg" alt="Select Columns 설정 화면" loading="lazy"><figcaption>Select Columns 설정 화면</figcaption></figure>
+  <div class="note"><strong>id는 Features에서 빼기</strong><p>원 자료 화면에는 Select Columns의 Features에 <code>id</code>가 함께 들어가 있습니다. id는 일련번호라 소득과 관계가 없으므로 Available Variables 쪽으로 옮겨 두는 것이 맞습니다.</p></div>
+</section>
+
+<!-- 학습·평가 -->
+<section id="train">
+  <div class="step-tag">5–6단계 · 모델 학습과 성능 평가</div>
+  <h2>세 가지 회귀 모델 비교하기</h2>
+  <div class="prose">
+    <p>Select Columns의 출력을 <b>Linear Regression</b>, <b>kNN</b>, <b>Random Forest</b>에 연결하고, 세 모델과 데이터를 모두 <b>Test and Score</b>에 연결합니다.</p>
+    <p>샘플링은 <b>Random sampling</b>(훈련 70%, 반복 10회)으로 설정합니다. 데이터를 섞어 무작위로 훈련용과 테스트용을 나누는 방식이라, 모델이 <b>처음 보는 데이터</b>로 평가됩니다.</p>
+  </div>
+  <figure class="fig "><img src="img/testscore-flow.jpg" alt="세 모델을 Test and Score에 연결한 워크플로" loading="lazy"><figcaption>세 모델을 Test and Score에 연결한 워크플로</figcaption></figure>
+  <div class="metrics">
+    <div class="metric"><b>MSE</b><span>오차 제곱의 평균. 낮을수록 좋음</span></div>
+    <div class="metric"><b>RMSE</b><span>MSE의 제곱근. 소득과 같은 단위라 읽기 쉬움</span></div>
+    <div class="metric"><b>MAE</b><span>오차 절댓값의 평균. 낮을수록 좋음</span></div>
+    <div class="metric"><b>R²</b><span>결정계수(설명력). 1에 가까울수록 좋음. 0.5면 50%를 설명</span></div>
+  </div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Model</th><th class="num">MSE</th><th class="num">RMSE</th><th class="num">MAE</th><th class="num">R²</th></tr></thead>
+      <tbody>
+        <tr><td>kNN</td><td class="num">15,710,050</td><td class="num">3,963.6</td><td class="num">2,558.1</td><td class="num">0.128</td></tr>
+        <tr><td>Random Forest</td><td class="num">11,958,144</td><td class="num">3,458.1</td><td class="num">1,974.1</td><td class="num">0.336</td></tr>
+        <tr><td class="best">Linear Regression</td><td class="num best">11,359,681</td><td class="num best">3,370.4</td><td class="num best">1,953.0</td><td class="num best">0.370</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <figure class="fig narrow"><img src="img/testscore.jpg" alt="Test and Score 결과 (Random sampling, 70%, 10회 반복)" loading="lazy"><figcaption>Test and Score 결과 (Random sampling, 70%, 10회 반복)</figcaption></figure>
+  <p class="prose">모든 지표에서 <b>Linear Regression</b>이 가장 좋고 kNN이 가장 낮습니다. 다만 R²가 0.37이라 소득 변화의 약 37%만 설명합니다. 2018년 데이터만 썼다는 한계가 있으니, 전체 데이터를 전처리해서 쓰면 성능이 나아질 수 있습니다.</p>
+</section>
+
+<!-- 예측 -->
+<section id="predict">
+  <div class="step-tag">7단계 · 예측</div>
+  <h2>Predictions로 예측값 확인하기</h2>
+  <div class="prose">
+    <p>Evaluate 묶음의 <b>Predictions</b> 위젯을 놓고, 세 모델과 Select Columns의 데이터를 연결합니다. 창을 열면 각 모델이 사람마다 소득을 얼마로 예측했는지 실제 income 옆에 나란히 보입니다.</p>
+  </div>
+  <figure class="fig "><img src="img/predict-flow.jpg" alt="Predictions 위젯까지 연결한 전체 워크플로" loading="lazy"><figcaption>Predictions 위젯까지 연결한 전체 워크플로</figcaption></figure>
+  <figure class="fig "><img src="img/predictions.jpg" alt="Predictions 창: 모델별 예측값과 평가 지표" loading="lazy"><figcaption>Predictions 창: 모델별 예측값과 평가 지표</figcaption></figure>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>#</th><th class="num">Linear Reg.</th><th class="num">kNN</th><th class="num">Random Forest</th><th class="num">실제 income</th><th class="num">가족 수</th><th class="num">출생</th><th class="num">학력</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">1</td><td class="num">2,395.6</td><td class="num">1,636.6</td><td class="num">1,780.2</td><td class="num">2,330</td><td class="num">1</td><td class="num">1945</td><td class="num">4</td></tr>
+        <tr><td class="mono">4</td><td class="num">9,692.4</td><td class="num">3,362.0</td><td class="num">2,883.0</td><td class="num">5,008</td><td class="num">5</td><td class="num">1962</td><td class="num">6</td></tr>
+        <tr><td class="mono">9</td><td class="num">9,463.0</td><td class="num">4,551.2</td><td class="num">8,043.9</td><td class="num">6,751</td><td class="num">4</td><td class="num">1978</td><td class="num">7</td></tr>
+        <tr><td class="mono">16</td><td class="num">7,476.6</td><td class="num">5,673.6</td><td class="num">8,008.7</td><td class="num">8,433</td><td class="num">4</td><td class="num">1952</td><td class="num">5</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Model (Predictions)</th><th class="num">MSE</th><th class="num">RMSE</th><th class="num">MAE</th><th class="num">R²</th></tr></thead>
+      <tbody>
+        <tr><td>Linear Regression</td><td class="num">10,421,657</td><td class="num">3,228.3</td><td class="num">1,938.9</td><td class="num">0.419</td></tr>
+        <tr><td>kNN</td><td class="num">9,904,473</td><td class="num">3,147.1</td><td class="num">2,039.3</td><td class="num">0.448</td></tr>
+        <tr><td>Random Forest</td><td class="num">3,686,974</td><td class="num">1,920.2</td><td class="num">1,055.8</td><td class="num">0.794</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note"><strong>왜 여기선 Random Forest가 1등일까?</strong>
+    <p>Predictions에 넣은 데이터는 모델이 <b>이미 학습한</b> 바로 그 1,137명입니다. 시험 문제를 미리 보고 푼 셈이라, 학습 데이터를 잘 외우는 Random Forest의 점수가 크게 올라갑니다(과적합). 처음 보는 데이터로 잰 Test and Score에서는 Linear Regression이 더 좋았습니다.</p>
+    <p>정말 공정하게 비교하려면 Data Sampler로 테스트용 데이터를 따로 떼어 Predictions에 넣어 보세요.</p>
+  </div>
+</section>
+
+<!-- 정리 -->
+<section id="wrap">
+  <div class="step-tag">정리하기</div>
+  <h2>학력만으로 소득이 정해지지는 않는다</h2>
+  <div class="prose">
+    <p>소득에 학력만 영향을 주는지 확인하려고 지역, 출생 연도, 결혼 상태 등 여러 정보로 모델을 학습했습니다. 처음 보는 데이터로 평가했을 때 Linear Regression이 가장 좋은 결과를 보였습니다.</p>
+    <p>분석 결과 소득에는 학력(education_level)뿐 아니라 가족 구성원 수(family_member), 태어난 해(year_born), 결혼 상태(marriage)도 함께 관련되어 있었습니다. 학력은 소득과 관련 있지만, 소득을 결정하는 유일한 요소라고 보기는 어렵습니다.</p>
+  </div>
+  <h3>생각해보기</h3>
+  <ol class="qs">
+    <li>year_born과 income의 상관계수가 음수인 이유는 무엇일까요? 이 데이터에는 은퇴한 고령층도 포함되어 있다는 점을 떠올려 보세요.</li>
+    <li>marriage는 1~6의 숫자로 되어 있지만 크기 순서가 있는 값일까요? 이런 속성에 Pearson 상관계수를 쓰면 어떤 문제가 생길까요?</li>
+    <li>R²가 0.37이라면 나머지 63%는 무엇으로 설명될까요? 데이터에 없는 어떤 정보가 소득에 영향을 줄지 적어 봅시다.</li>
+    <li>이 모델로 실제 사람의 소득을 예측해 대출 심사나 채용에 쓴다면 어떤 문제가 생길 수 있을까요?</li>
+  </ol>
+</section>
+</main>
+</div>
+
+<footer>
+  <div>원자료: 황은아(구미산동고), 「개인에 관한 신상정보로 소득 정도를 예측할 수 있을까?」, 『데이터 기반 인공지능 교육 자료』 35–52쪽</div>
+  <div>참고: <a href="https://orange3.readthedocs.io/projects/orange-visual-programming/en/latest/widgets/data/correlations.html" target="_blank" rel="noopener">Orange Visual Programming – Correlations</a> · <a href="https://support.minitab.com/ko-kr/minitab/18/help-and-how-to/statistics/basic-statistics/supporting-topics/correlation-and-covariance/a-comparison-of-the-pearson-and-spearman-correlation-methods/" target="_blank" rel="noopener">Minitab – Pearson 및 Spearman 상관 비교</a></div>
+</footer>
+</div>
+
+<script>
+(function(){
+  // 상관계수 막대
+  const data=[["family_member",0.581],["education_level",0.471],["year_born",-0.398],["marriage",-0.310],["id",-0.098],["region",-0.068]];
+  const host=document.getElementById("bars");
+  host.style.display="grid";host.style.gap="10px";
+  data.forEach(([n,v])=>{
+    const row=document.createElement("div");row.className="bar";
+    const left=v>=0?50:50+v*50, w=Math.abs(v)*50;
+    const col=v>=0?"var(--pos)":"var(--neg)";
+    row.innerHTML=`<div class="name">${n}</div><div class="track"><div class="fill" style="left:${left}%;width:${w}%;background:${col}"></div></div><div class="v">${v>0?"+":""}${v.toFixed(3)}</div>`;
+    host.appendChild(row);
+  });
+
+  // 상관계수 데모
+  const cv=document.getElementById("cv"),ctx=cv.getContext("2d");
+  const rs=document.getElementById("rs"),rv=document.getElementById("rv"),rl=document.getElementById("rlabel");
+  let base=[];
+  function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+  function seed(){base=Array.from({length:120},()=>[gauss(),gauss()]);}
+  function label(r){const a=Math.abs(r);const s=r<0?"음의 ":r>0?"양의 ":"";
+    if(a<0.2)return"상관관계가 거의 없다";if(a<0.4)return s+"상관관계가 낮다";if(a<0.6)return s+"상관관계가 있다";if(a<0.8)return s+"상관관계가 높다";return s+"상관관계가 매우 높다";}
+  function draw(){
+    const t=parseFloat(rs.value),k=Math.sqrt(Math.max(0,1-t*t));
+    const pts=base.map(([a,b])=>[a,t*a+k*b]);
+    const n=pts.length,mx=pts.reduce((s,p)=>s+p[0],0)/n,my=pts.reduce((s,p)=>s+p[1],0)/n;
+    let sxy=0,sxx=0,syy=0;pts.forEach(([x,y])=>{sxy+=(x-mx)*(y-my);sxx+=(x-mx)**2;syy+=(y-my)**2});
+    const r=sxy/Math.sqrt(sxx*syy||1);
+    rv.textContent=(r>=0?"":"−")+Math.abs(r).toFixed(2);rl.textContent=label(r);
+    const cs=getComputedStyle(document.documentElement);
+    const W=cv.width,H=cv.height,pad=30,sc=(H-2*pad)/7;
+    ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle=cs.getPropertyValue("--line").trim();ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(pad,H-pad);ctx.lineTo(W-pad,H-pad);ctx.moveTo(pad,pad);ctx.lineTo(pad,H-pad);ctx.stroke();
+    const X=x=>W/2+x*sc*1.2,Y=y=>H/2-y*sc;
+    ctx.fillStyle=cs.getPropertyValue("--teal").trim();ctx.globalAlpha=.7;
+    pts.forEach(([x,y])=>{ctx.beginPath();ctx.arc(X(x),Y(y),5,0,Math.PI*2);ctx.fill()});
+    ctx.globalAlpha=1;
+    const slope=sxy/(sxx||1);ctx.strokeStyle=cs.getPropertyValue("--orange").trim();ctx.lineWidth=2.5;
+    ctx.beginPath();ctx.moveTo(X(-3.5),Y(my+slope*(-3.5-mx)));ctx.lineTo(X(3.5),Y(my+slope*(3.5-mx)));ctx.stroke();
+  }
+  seed();draw();
+  rs.addEventListener("input",draw);
+  document.getElementById("again").addEventListener("click",()=>{seed();draw()});
+  if(window.matchMedia)window.matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",draw);
+  new MutationObserver(draw).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+})();
+</script>
+
+</body>
+</html>
