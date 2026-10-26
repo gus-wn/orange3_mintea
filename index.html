@@ -1,9 +1,150 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>소득 예측 AI 수업</title>
-<style>body{font-family:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;max-width:640px;margin:0 auto;padding:48px 16px;color:#18242c;line-height:1.7}a{display:block;padding:14px 18px;margin:10px 0;border:1px solid #dde3e7;border-radius:8px;color:#d9661f;text-decoration:none;font-weight:700}a:hover{background:#fbe9dc}p{color:#5b6a73}</style></head>
-<body><h1>개인에 관한 신상정보로 소득 정도를 예측할 수 있을까?</h1>
-<p>Orange3 회귀 실습 · Kaggle「Korea Income and Welfare」</p>
-<a href="lesson.html">수업 자료 보기 →</a>
-<a href="worksheet.html">학생 학습지 풀기 →</a>
-</body></html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>밍티의 AI 교실</title>
+<meta name="description" content="밍티와 함께하는 Orange3 인공지능 수업 학습지 모음">
+<link rel="icon" href="img/mingti-pixel.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&display=swap">
+<style>
+@font-face{font-family:"Galmuri11";src:url("fonts/Galmuri11.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Galmuri11";src:url("fonts/Galmuri11-Bold.woff2") format("woff2");font-weight:700;font-display:swap}
+/* Layout: 하늘색 도트 하늘 아래 밍티가 말을 걸고, 그 아래 게임 메뉴처럼 수업 버튼이 쌓인다. 픽셀 세계 하나로 고정한 라이트 테마. */
+:root{
+  color-scheme:light;
+  --sky:#cfeaf8; --sky-dot:#b9dff2; --blue:#7fc0e6; --blue-deep:#4f97c8;
+  --cream:#fbf4e2; --pink:#f2a3b4; --pink-soft:#fde3e9;
+  --brown:#8a5a3c; --line:#33506b; --white:#ffffff;
+  --pixel:"Galmuri11","DotGothic16",monospace;
+  --hand:"꾸불림체","KkubulimLocal","Gaegu","Galmuri11",cursive;
+  --px:4px;
+}
+@font-face{font-family:"KkubulimLocal";src:local("꾸불림체"),local("Kkubulim")}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  min-height:100vh;background-color:var(--sky);color:var(--line);font-family:var(--pixel);font-size:15px;line-height:1.7;
+  background-image:radial-gradient(var(--sky-dot) 1.6px,transparent 1.7px);background-size:16px 16px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:calc(env(safe-area-inset-top,0px) + 28px) calc(env(safe-area-inset-bottom,0px) + 40px);
+  -webkit-font-smoothing:none;word-break:keep-all;overflow-wrap:anywhere;
+}
+.wrap{max-width:880px;margin:0 auto;display:grid;gap:36px;position:relative}
+
+/* 도트 구름·꽃잎 */
+.deco{position:absolute;width:var(--px);height:var(--px);pointer-events:none;image-rendering:pixelated}
+.cloud{color:var(--white);background:currentColor;
+  box-shadow:4px 0,8px 0,12px 0,16px 0,-4px 4px,0 4px,4px 4px,8px 4px,12px 4px,16px 4px,20px 4px,24px 4px,
+  -8px 8px,-4px 8px,0 8px,4px 8px,8px 8px,12px 8px,16px 8px,20px 8px,24px 8px,28px 8px,
+  -8px 12px,-4px 12px,0 12px,4px 12px,8px 12px,12px 12px,16px 12px,20px 12px,24px 12px,28px 12px;transform:scale(1.6);transform-origin:0 0}
+.petal{color:var(--pink);background:currentColor;box-shadow:0 -4px,0 4px,-4px 0,4px 0;outline:0}
+.petal::after{content:"";position:absolute;inset:0;background:var(--cream)}
+.c1{top:10px;left:2%} .c2{top:150px;right:4%;transform:scale(1.2)} .c3{top:420px;left:-2%;transform:scale(1)}
+.p1{top:70px;right:30%} .p2{top:300px;left:44%} .p3{top:520px;right:6%} .p4{top:230px;left:6%}
+
+/* 머리 */
+header{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:24px;align-items:end;padding-top:24px;position:relative;z-index:1}
+.hello{display:grid;gap:18px;align-content:end}
+.badge{justify-self:start;font-size:.78rem;letter-spacing:.08em;background:var(--white);padding:2px 10px;
+  box-shadow:0 -4px 0 0 var(--white),0 4px 0 0 var(--white),-4px 0 0 0 var(--white),4px 0 0 0 var(--white)}
+h1{margin:0;font-weight:700;font-size:clamp(2rem,6vw,3.2rem);line-height:1.2;color:var(--brown);text-wrap:balance;
+  text-shadow:3px 3px 0 var(--white),-3px 3px 0 var(--white),3px -3px 0 var(--white),-3px -3px 0 var(--white),0 3px 0 var(--white),0 -3px 0 var(--white),3px 0 0 var(--white),-3px 0 0 var(--white),6px 6px 0 var(--blue)}
+h1 .en{display:block;font-size:.4em;color:var(--blue-deep);text-shadow:none;letter-spacing:.12em;margin-top:6px}
+
+/* 말풍선: 계단 모서리 */
+.bubble{position:relative;background:var(--white);padding:14px 18px;font-family:var(--hand);font-size:1.35rem;line-height:1.5;color:var(--line);
+  box-shadow:0 -4px 0 0 var(--white),0 4px 0 0 var(--white),-4px 0 0 0 var(--white),4px 0 0 0 var(--white),
+  0 -8px 0 0 var(--line),0 8px 0 0 var(--line),-8px 0 0 0 var(--line),8px 0 0 0 var(--line),
+  -4px -4px 0 0 var(--line),4px -4px 0 0 var(--line),-4px 4px 0 0 var(--line),4px 4px 0 0 var(--line);margin:8px}
+
+.mingti{position:relative;justify-self:center;width:min(100%,330px)}
+.mingti img{display:block;width:100%;max-width:100%;height:auto;image-rendering:pixelated;animation:bob 1.2s steps(2,end) infinite}
+.mingti .name{position:absolute;left:-6px;bottom:4px;font-family:var(--pixel);font-weight:700;font-size:1.6rem;line-height:1;color:var(--brown);
+  text-shadow:2px 2px 0 var(--white),-2px 2px 0 var(--white),2px -2px 0 var(--white),-2px -2px 0 var(--white)}
+.mingti .name small{display:block;font-size:.55em;color:var(--blue-deep);margin-top:4px}
+@keyframes bob{0%{transform:translateY(0)}100%{transform:translateY(-8px)}}
+
+/* 메뉴 창 */
+.window{background:var(--cream);position:relative;z-index:1;
+  box-shadow:0 -4px 0 0 var(--line),0 4px 0 0 var(--line),-4px 0 0 0 var(--line),4px 0 0 0 var(--line),8px 8px 0 0 rgba(51,80,107,.25);margin:4px}
+.titlebar{display:flex;align-items:center;gap:10px;background:var(--blue);color:var(--white);padding:6px 14px;font-weight:700;letter-spacing:.04em;border-bottom:4px solid var(--line)}
+.titlebar .dots{display:flex;gap:6px;margin-left:auto}
+.titlebar .dots i{width:10px;height:10px;background:var(--white);display:block}
+.titlebar .dots i:first-child{background:var(--pink)}
+.menu{list-style:none;margin:0;padding:20px;display:grid;gap:16px}
+.quest{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:16px;align-items:center;text-decoration:none;color:var(--line);
+  background:var(--white);padding:16px 18px;position:relative;transition:transform .08s steps(1)}
+.quest{box-shadow:0 -4px 0 0 var(--line),0 4px 0 0 var(--line),-4px 0 0 0 var(--line),4px 0 0 0 var(--line),6px 10px 0 0 var(--blue)}
+.quest:hover{background:var(--pink-soft)}
+.quest:active{transform:translate(4px,4px);box-shadow:0 -4px 0 0 var(--line),0 4px 0 0 var(--line),-4px 0 0 0 var(--line),4px 0 0 0 var(--line),2px 6px 0 0 var(--blue)}
+.quest:focus-visible{outline:4px dashed var(--pink);outline-offset:8px}
+.quest .no{font-weight:700;font-size:1.5rem;color:var(--white);background:var(--brown);width:2.2em;height:2.2em;display:grid;place-items:center}
+.quest .t{display:grid;gap:4px;min-width:0}
+.quest .t b{font-size:1.12rem;line-height:1.45;text-wrap:balance}
+.quest .t span{font-size:.78rem;color:var(--blue-deep)}
+.quest .go{font-weight:700;color:var(--brown);white-space:nowrap}
+.quest .go::before{content:"▶ ";color:var(--pink)}
+.locked{display:flex;gap:12px;align-items:center;padding:10px 18px;color:#7d93a6;font-size:.85rem;border:4px dashed #bcd3e2}
+
+.tips{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;padding:0 20px 20px;font-size:.82rem}
+.tips div{background:var(--white);padding:10px 12px;border-left:4px solid var(--blue)}
+.tips b{color:var(--brown)}
+
+footer{text-align:center;font-size:.75rem;color:var(--blue-deep);position:relative;z-index:1}
+
+@media (max-width:680px){
+  header{grid-template-columns:minmax(0,1fr)}
+  .mingti{width:min(70%,260px);order:-1}
+  .quest{grid-template-columns:auto minmax(0,1fr)}
+  .quest .go{grid-column:2}
+  .c2,.p1{display:none}
+}
+@media (prefers-reduced-motion:reduce){.mingti img{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="deco cloud c1" aria-hidden="true"></span>
+  <span class="deco cloud c2" aria-hidden="true"></span>
+  <span class="deco cloud c3" aria-hidden="true"></span>
+  <span class="deco petal p1" aria-hidden="true"></span>
+  <span class="deco petal p2" aria-hidden="true"></span>
+  <span class="deco petal p3" aria-hidden="true"></span>
+  <span class="deco petal p4" aria-hidden="true"></span>
+
+  <header>
+    <div class="hello">
+      <span class="badge">ORANGE3 · 데이터 기반 인공지능</span>
+      <h1>밍티의 AI 교실<span class="en">MINGTI'S AI CLASS</span></h1>
+      <p class="bubble">안녕! 나는 밍티야. 오늘은 진짜 데이터로 인공지능 모델을 만들어 볼 거야. 아래에서 학습지를 골라 줘!</p>
+    </div>
+    <div class="mingti">
+      <img src="img/mingti-pixel.png" alt="도트로 그린 밍티" width="528" height="592">
+      <div class="name">밍티<small>Mingti</small></div>
+    </div>
+  </header>
+
+  <section class="window" aria-labelledby="menu-title">
+    <div class="titlebar"><span id="menu-title">학습지 고르기</span><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span></div>
+    <ul class="menu">
+      <li>
+        <a class="quest" href="worksheet.html">
+          <span class="no">1</span>
+          <span class="t"><b>개인에 관한 신상정보로 소득 정도를 예측할 수 있을까?</b><span>회귀 · Linear Regression · kNN · Random Forest</span></span>
+          <span class="go">시작</span>
+        </a>
+      </li>
+      <li class="locked" aria-label="다음 학습지 준비 중">[LOCK] 다음 학습지는 준비 중이에요</li>
+    </ul>
+    <div class="tips">
+      <div><b>저장</b> 적은 답은 이 브라우저에 자동으로 저장돼요.</div>
+      <div><b>제출</b> 다 풀면 맨 아래 'PDF로 내려받기'를 눌러요.</div>
+      <div><b>준비물</b> Orange3 프로그램과 income2018.csv</div>
+    </div>
+  </section>
+
+  <footer>© 밍티 · gus-wn</footer>
+</div>
+</body>
+</html>
