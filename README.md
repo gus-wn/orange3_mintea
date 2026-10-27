@@ -10,6 +10,9 @@
    Kaggle「Korea Income and Welfare」데이터를 Orange3로 탐색하고 회귀 모델(Linear Regression, kNN, Random Forest)로 소득을 예측합니다.
    빈칸·선택 문항 자동 채점, 서술형 문항, PDF 내려받기를 지원합니다.
 
+2. **태아의 건강 상태를 미리 알 수 있을까?** (`worksheet2.html`)
+   Kaggle「Fetal Health Classification」데이터로 태아 건강 상태(정상·주의·나쁨)를 분류합니다. Distributions, Scatter Plot, Rank, 분류 모델 5가지, Confusion Matrix를 다룹니다.
+
 ## 파일
 
 - `index.html` 첫 화면 (학습지 목록)

@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>태아 건강 예측 학습지</title>
+<link rel="icon" href="img/mingti-pixel.png">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+@font-face{font-family:"BM Kkubulim";src:url("fonts/BMKkubulim.woff2") format("woff2");font-weight:normal;font-style:normal;font-display:swap}
+@font-face{font-family:"ChosunMyungjoEmbed";src:url("fonts/ChosunilboMyungjo.woff") format("woff");font-display:swap}
+@font-face{font-family:"KkubulimLocal";src:local("꾸불림체"),local("꾸불림"),local("Kkubulim")}
+/* Layout: 1번 학습지와 같은 A4 종이 한 장. 위젯 연결도는 오렌지3 캔버스를 본뜬 작은 그림으로 그린다. */
+:root{
+  color-scheme:light;
+  --desk:#e4e8eb; --paper:#ffffff; --ink:#1c2830; --muted:#5f6d75; --rule:#cfd7dc;
+  --orange:#d4621a; --orange-soft:#fdeee3; --teal:#17697a; --teal-soft:#e2f0f2;
+  --ok-soft:#e5f3e8; --no-soft:#fbe7e1; --memo:#fff7d6;
+  --w-data:#f6b26b; --w-vis:#f4a6a6; --w-model:#e8a3d6; --w-eval:#9fd8e0;
+  --hand:"BM Kkubulim","꾸불림체","Gaegu","ChosunMyungjoEmbed",cursive;
+  --serif:"조선일보명조","Chosunilbo_myungjo","ChosunMyungjoEmbed","Nanum Myeongjo","AppleMyungjo","Batang",serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--desk);color:var(--ink);font-family:var(--serif);font-size:16.5px;line-height:1.75;word-break:keep-all;overflow-wrap:anywhere;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:calc(env(safe-area-inset-top,0px) + 28px) calc(env(safe-area-inset-bottom,0px) + 64px)}
+.sheet{max-width:860px;margin:0 auto;background:var(--paper);border-radius:4px;box-shadow:0 1px 3px rgba(20,30,40,.12),0 12px 32px rgba(20,30,40,.08);padding:clamp(20px,5vw,56px);display:grid;gap:44px}
+h1,h2,h3{font-family:var(--hand);font-weight:400;margin:0;text-wrap:balance;line-height:1.25}
+p{margin:0}
+code,.mono{font-family:var(--mono);font-size:.86em}
+code{background:var(--teal-soft);color:var(--teal);padding:0 5px;border-radius:3px}
+a{color:var(--teal)}
+
+.head{display:grid;gap:18px;border-bottom:3px double var(--ink);padding-bottom:22px}
+.course{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 16px;font-size:.85rem;color:var(--muted)}
+.home{color:var(--teal);text-decoration:none;font-family:var(--hand);font-size:1.05rem}
+.home:hover{text-decoration:underline}
+.head h1{font-size:clamp(1.9rem,5vw,2.7rem)}
+.head h1 small{display:block;font-size:.5em;color:var(--orange);margin-bottom:4px}
+.idrow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.idrow label{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:end;gap:8px;font-size:.92rem}
+.idrow input{border:0;border-bottom:1.5px solid var(--ink);font:inherit;font-family:var(--hand);font-size:1.2rem;padding:0 4px;min-width:0;background:transparent;color:var(--ink)}
+.goals{background:var(--orange-soft);border-radius:6px;padding:14px 18px;display:grid;gap:6px}
+.goals b{font-family:var(--hand);font-size:1.2rem;color:var(--orange)}
+.goals ul{margin:0;padding-left:1.2em}
+
+.act{display:grid;gap:16px}
+.act-h{display:flex;align-items:baseline;gap:12px;border-bottom:1.5px solid var(--ink);padding-bottom:6px;flex-wrap:wrap}
+.act-h .no{font-family:var(--hand);font-size:1.05rem;color:#fff;background:var(--orange);padding:0 12px;border-radius:999px;white-space:nowrap}
+.act-h h2{font-size:1.65rem}
+.act-h .tool{margin-left:auto;font-size:.8rem;color:var(--muted)}
+.read{display:grid;gap:10px}
+ol.steps{margin:0;padding-left:1.4em;display:grid;gap:6px}
+ol.steps li::marker{font-family:var(--hand);color:var(--orange);font-weight:700}
+.q{display:grid;gap:10px;padding:14px 0 4px;border-top:1px dashed var(--rule)}
+.q .qt{font-weight:700}
+.q .qt::before{content:attr(data-n);font-family:var(--hand);color:var(--orange);font-size:1.25rem;margin-right:6px}
+textarea{width:100%;min-height:92px;font:inherit;font-family:var(--hand);font-size:1.2rem;line-height:32px;padding:0 8px;border:1px solid var(--rule);border-radius:4px;resize:vertical;color:var(--ink);
+  background:repeating-linear-gradient(to bottom,transparent 0 31px,var(--rule) 31px 32px),var(--paper);background-attachment:local}
+input.blank{font:inherit;font-family:var(--hand);font-size:1.2rem;width:7em;max-width:100%;border:0;border-bottom:1.5px solid var(--ink);text-align:center;background:transparent;color:var(--ink);padding:0 4px}
+select{font:inherit;font-size:.92rem;padding:3px 6px;border:1px solid var(--rule);border-radius:4px;background:var(--paper);color:var(--ink);max-width:100%}
+textarea:focus-visible,input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+.ok{background:var(--ok-soft)!important}
+.no-{background:var(--no-soft)!important}
+.check{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button{font:inherit;font-family:var(--hand);font-size:1.1rem;padding:2px 16px;border-radius:999px;border:1.5px solid var(--ink);background:var(--paper);color:var(--ink);cursor:pointer}
+button:hover{background:var(--ink);color:var(--paper)}
+button.pdf{background:var(--orange);border-color:var(--orange);color:#fff}
+button.pdf:hover{background:#b8520f;border-color:#b8520f}
+button:disabled{opacity:.6;cursor:wait}
+.result{font-size:.9rem;color:var(--muted)}
+details.hint{background:var(--memo);border-radius:4px;padding:8px 14px;font-size:.92rem}
+details.hint summary{cursor:pointer;font-family:var(--hand);font-size:1.1rem;color:var(--orange)}
+details.hint[open] summary{margin-bottom:6px}
+.tick{display:grid;gap:6px}
+.tick label{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+.tick input{accent-color:var(--orange);margin-top:6px;width:18px;height:18px;flex:none}
+
+.tbl{overflow-x:auto;border:1px solid var(--rule);border-radius:4px}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{padding:8px 12px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:middle}
+th{background:#f2f5f7;font-weight:700;font-size:.82rem}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+td input.blank{width:5.5em}
+.tag{font-family:var(--mono);font-size:.82rem;white-space:nowrap}
+
+.concept{border:1.5px solid var(--teal);border-radius:6px;padding:16px 18px;display:grid;gap:10px}
+.concept h3{font-size:1.35rem;color:var(--teal)}
+
+/* 오렌지3 화면 그림 */
+.mock{border:1px solid var(--rule);border-radius:6px;overflow:hidden;font-family:var(--mono);font-size:.78rem}
+.mock .bar{background:#eef1f3;padding:4px 10px;color:var(--muted);border-bottom:1px solid var(--rule)}
+.mock .body{display:grid;grid-template-columns:minmax(120px,190px) minmax(0,1fr);min-height:230px}
+.mock .pal{background:#f7f8f9;border-right:1px solid var(--rule);padding:8px;display:grid;gap:4px;align-content:start}
+.mock .pal div{padding:3px 8px;border-radius:3px;display:flex;align-items:center;gap:6px}
+.mock .pal i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.mock .canvas{position:relative;background:radial-gradient(#e3e8eb 1px,transparent 1.2px) 0 0/14px 14px;padding:10px;min-width:0}
+.mark{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--orange);color:#fff;font-family:var(--hand);font-size:1rem;font-weight:700}
+.flow{overflow-x:auto}
+.flow svg{display:block;min-width:520px;width:100%;height:auto}
+.flow text{font-family:var(--mono);font-size:12px;fill:var(--ink)}
+
+.fig{margin:0;display:grid;gap:6px;min-width:0}
+.fig img{width:100%;max-width:100%;height:auto;display:block;border:1px solid var(--rule);border-radius:4px}
+.fig figcaption{font-size:.8rem;color:var(--muted)}
+.fig.narrow{max-width:520px}
+.figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;align-items:start}
+code{overflow-wrap:anywhere}
+ul.plain{margin:0;padding-left:1.3em;display:grid;gap:6px}
+.tip{background:var(--memo);border-radius:4px;padding:10px 14px;font-size:.95rem}
+.tip b:first-child{font-family:var(--hand);color:var(--orange);font-weight:400;font-size:1.1rem;margin-right:6px}
+.self{display:grid;gap:8px}
+.self .row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;border-bottom:1px dashed var(--rule);padding-bottom:6px}
+.stars{display:flex;gap:2px}
+.stars button{border:0;padding:0 2px;font-size:1.5rem;line-height:1;color:var(--rule);background:none}
+.stars button.on{color:var(--orange)}
+.stars button:hover{background:none;color:var(--orange)}
+.foot{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;border-top:3px double var(--ink);padding-top:16px;font-size:.82rem;color:var(--muted)}
+.foot .btns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.toast{font-family:var(--hand);font-size:1.1rem;color:#2c7a3f}
+
+.pdfmode .sheet{box-shadow:none;border-radius:0}
+.pdfmode .check,.pdfmode .foot .btns,.pdfmode details.hint,.pdfmode .home,.pdfmode .copyurl{display:none!important}
+.ta-print{min-height:64px;white-space:pre-wrap;overflow-wrap:anywhere;font-family:var(--hand);font-size:1.2rem;line-height:32px;padding:4px 10px;border:1px solid var(--rule);border-bottom:2px solid var(--ink);border-radius:4px;background:#fff}
+.sel-print{font-family:var(--hand);font-size:1.15rem;border-bottom:1.5px solid var(--ink);padding:0 6px}
+@media (max-width:640px){
+  .idrow{grid-template-columns:minmax(0,1fr)}
+  .act-h .tool{margin-left:0;width:100%}
+  .mock .body{grid-template-columns:minmax(0,1fr)}
+  .mock .pal{border-right:0;border-bottom:1px solid var(--rule);grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+</style>
+</head>
+<body>
+<div class="sheet">
+<header class="head">
+  <div class="course"><a class="home" href="index.html">← 밍티의 수업 목록</a><span>정보 · 인공지능 수업 | 데이터 기반 인공지능</span><span>Orange3 분류 실습</span></div>
+  <h1><small>활동 학습지 2</small>태아의 건강 상태를<br>미리 알 수 있을까?</h1>
+  <div class="idrow">
+    <label for="sid">학번 <input id="sid" autocomplete="off"></label>
+    <label for="sname">이름 <input id="sname" autocomplete="off"></label>
+    <label for="sdate">날짜 <input id="sdate" autocomplete="off"></label>
+  </div>
+  <div class="goals">
+    <b>학습 목표</b>
+    <ul>
+      <li>Distributions와 Scatter Plot으로 데이터를 잘 구분하는 속성을 찾을 수 있다.</li>
+      <li>Rank로 중요한 속성을 골라 여러 분류 모델을 학습시키고 정확도(CA)로 비교할 수 있다.</li>
+      <li>Confusion Matrix로 모델이 어떤 경우를 틀렸는지 해석하고, 의료 분야 인공지능 활용의 주의점을 생각할 수 있다.</li>
+    </ul>
+  </div>
+</header>
+
+<!-- 생각 열기 -->
+<section class="act" id="a0">
+  <div class="act-h"><span class="no">생각 열기</span><h2>엄마 배 속 아기의 건강, 어떻게 알 수 있을까?</h2></div>
+  <div class="read">
+    <p>우리나라는 저출산으로 많은 사회적 어려움이 예상되고 있습니다. 그만큼 지금 태어날 한 명 한 명의 생명이 더욱 소중합니다. 이 소중한 생명을 지키려면 태아의 건강 상태를 미리 잘 파악하는 것이 중요합니다.</p>
+    <p>하지만 태아는 엄마 배 속에 있어서 의사가 직접 보고 진찰하기 어렵습니다. 그래서 병원에서는 <b>태아 심박동 검사(CTG)</b>로 아기의 심장 박동, 움직임, 엄마의 자궁 수축 같은 데이터를 기록해 건강 상태를 판단합니다. 오늘은 이 데이터로 태아의 건강 상태를 예측하는 인공지능 모델을 만들어 봅니다.</p>
+  </div>
+  <div class="q">
+    <p class="qt" data-n="Q1.">태아를 직접 볼 수 없다면 어떤 정보로 건강 상태를 짐작할 수 있을까요? 떠오르는 것을 2가지 이상 적어 봅시다.</p>
+    <textarea id="q1" aria-label="Q1 답"></textarea>
+  </div>
+  <div class="concept">
+    <h3>알아두기 · 분류와 회귀</h3>
+    <p>머신러닝으로 맞히려는 값(target)이 <b>숫자의 크기</b>이면 <b>회귀</b>, <b>몇 가지 종류 중 하나</b>이면 <b>분류</b>라고 합니다. 1번 학습지의 소득 예측은 회귀였습니다.</p>
+    <p>이번 데이터의 target인 태아 건강 상태는 <b>1 정상, 2 주의, 3 나쁨</b> 세 가지로 나뉩니다. 1, 2, 3이 숫자처럼 보이지만 크기를 계산하는 값이 아니라 <b>무리(종류)를 나타내는 이름표</b>입니다.</p>
+  </div>
+  <div class="q">
+    <p class="qt" data-n="Q2.">태아의 건강 상태(1 정상, 2 주의, 3 나쁨)를 맞히는 문제는 어떤 문제일까요?</p>
+    <p><select id="ptype" data-ans="분류" aria-label="문제 유형"><option value="">선택</option><option>분류</option><option>회귀</option></select></p>
+    <div class="check"><button type="button" data-check="ptype">정답 확인</button><span class="result" id="r-ptype"></span></div>
+  </div>
+</section>
+
+<!-- 활동 1 -->
+<section class="act" id="a1">
+  <div class="act-h"><span class="no">활동 1</span><h2>데이터 준비하기</h2><span class="tool">Kaggle</span></div>
+  <div class="read">
+    <p>캐글(kaggle.com)에서 <b>Fetal Health Classification</b>을 검색해 <b>Download</b>를 누르면 <code>fetal_health.csv</code>를 내려받을 수 있습니다. 태아 심박동 검사(CTG) 기록 2,126개를 모은 데이터입니다.</p>
+  </div>
+  <figure class="fig"><img src="img/fh-kaggle.jpg" alt="캐글 Fetal Health Classification 페이지"><figcaption>[그림 6-1] 캐글의 Fetal Health Classification 데이터 세트</figcaption></figure>
+  <div class="read">
+    <p>내려받은 파일에는 속성이 22개 있습니다. 이 중 이름에 <b>histogram</b>이 들어간 속성은 다른 속성들을 요약한 <b>통계치</b>라서 지우고 사용합니다. 엑셀에서 해당 열을 지운 뒤 다시 저장합니다.</p>
+  </div>
+  <div class="figs">
+    <figure class="fig"><img src="img/fh-excel-before.jpg" alt="수정 전 데이터 파일"><figcaption>[그림 6-2] 수정 전 파일</figcaption></figure>
+    <figure class="fig"><img src="img/fh-excel-after.jpg" alt="수정 후 데이터 파일"><figcaption>[그림 6-3] histogram 속성을 지운 파일</figcaption></figure>
+  </div>
+  <p class="tip"><b>꿀팁</b> 엑셀이 없으면 오렌지3의 <b>Select Columns</b> 위젯에서 histogram 속성들을 왼쪽(숨길 열)으로 옮겨도 똑같이 뺄 수 있어요.</p>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>속성</th><th>뜻</th><th>비고</th></tr></thead>
+      <tbody>
+        <tr><td class="tag">baseline value</td><td>기준 태아 심박 수 (1분당)</td><td></td></tr>
+        <tr><td class="tag">accelerations</td><td>초당 심박 가속 횟수</td><td></td></tr>
+        <tr><td class="tag">fetal_movement</td><td>초당 태아 움직임 횟수</td><td></td></tr>
+        <tr><td class="tag">uterine_contractions</td><td>초당 자궁 수축 횟수</td><td></td></tr>
+        <tr><td class="tag">light_decelerations</td><td>초당 가벼운 심박 감소 횟수</td><td></td></tr>
+        <tr><td class="tag">severe_decelerations</td><td>초당 심한 심박 감소 횟수</td><td></td></tr>
+        <tr><td class="tag">prolongued_decelerations</td><td>초당 오래 이어지는 심박 감소 횟수</td><td></td></tr>
+        <tr><td class="tag">abnormal_short_term_variability</td><td>단기 변동성이 비정상인 시간의 비율(%)</td><td></td></tr>
+        <tr><td class="tag">mean_value_of_short_term_variability</td><td>단기 변동성의 평균</td><td></td></tr>
+        <tr><td class="tag">percentage_of_time_with_abnormal_long_term_variability</td><td>장기 변동성이 비정상인 시간의 비율(%)</td><td></td></tr>
+        <tr><td class="tag">mean_value_of_long_term_variability</td><td>장기 변동성의 평균</td><td></td></tr>
+        <tr><td class="tag">fetal_health</td><td>태아 건강 상태</td><td>1 정상, 2 주의, 3 나쁨</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="result">변동성: 심장 박동 간격이 얼마나 오르내리는지를 나타내는 값입니다. 건강한 태아는 심박이 적당히 오르내립니다.</p>
+  <div class="q">
+    <p class="qt" data-n="Q3.">설명을 읽고 빈칸을 채워 봅시다.</p>
+    <p>이 데이터는 태아 <input class="blank" id="b1" data-ans="2126|2,126|2126개|2,126개" inputmode="numeric" aria-label="데이터 개수">명의 검사 기록이다. histogram 속성은 다른 속성의 <input class="blank" id="b2" data-ans="통계치|통계|통계값|요약" aria-label="histogram 속성을 지우는 이유">이므로 지운다. 지우고 남은 속성은 target을 포함해 <input class="blank" id="b3" data-ans="12|12개" inputmode="numeric" aria-label="남은 속성 수">개이고, target인 fetal_health는 <input class="blank" id="b4" data-ans="3|3개|3가지" inputmode="numeric" aria-label="target 값 종류">가지 값으로 되어 있다.</p>
+    <div class="check"><button type="button" data-check="b1,b2,b3,b4">정답 확인</button><span class="result" id="r-b1"></span></div>
+  </div>
+</section>
+
+<!-- 활동 2 -->
+<section class="act" id="a2">
+  <div class="act-h"><span class="no">활동 2</span><h2>데이터 불러오고 역할 정하기</h2><span class="tool">File · Data Table</span></div>
+  <ol class="steps">
+    <li>오렌지3를 실행하고 <b>File</b> 위젯을 캔버스에 끌어다 놓습니다.</li>
+    <li>File을 더블클릭해 수정한 CSV 파일을 엽니다. <code>fetal_health</code>의 Type을 <b>categorical</b>, Role을 <b>target</b>으로 바꾸고 <b>Apply</b>를 누릅니다.</li>
+    <li><b>Data Table</b>을 연결해 데이터가 잘 들어왔는지 확인합니다.</li>
+  </ol>
+  <div class="figs">
+    <figure class="fig"><img src="img/fh-file-canvas.jpg" alt="캔버스에 File 위젯 놓기"><figcaption>[그림 6-4] 캔버스에 File 위젯 놓기</figcaption></figure>
+    <figure class="fig"><img src="img/fh-file-roles.jpg" alt="File 위젯에서 fetal_health를 target으로 설정"><figcaption>[그림 6-5] fetal_health를 categorical, target으로</figcaption></figure>
+  </div>
+  <figure class="fig"><img src="img/fh-datatable.jpg" alt="Data Table로 데이터 확인"><figcaption>[그림 6-6] Data Table로 데이터 확인</figcaption></figure>
+  <div class="q">
+    <p class="qt" data-n="Q4.">fetal_health의 Type과 Role을 골라 봅시다.</p>
+    <p>Type <select id="ftype" data-ans="categorical" aria-label="fetal_health Type"><option value="">선택</option><option>numeric</option><option>categorical</option></select>
+       Role <select id="frole" data-ans="target" aria-label="fetal_health Role"><option value="">선택</option><option>feature</option><option>target</option><option>meta</option><option>skip</option></select></p>
+    <div class="check"><button type="button" data-check="ftype,frole">정답 확인</button><span class="result" id="r-ftype"></span></div>
+    <p>Type을 numeric이 아니라 categorical로 해야 하는 이유를 써 봅시다.</p>
+    <textarea id="q4" aria-label="Q4 이유"></textarea>
+    <details class="hint"><summary>힌트</summary>Q2에서 1, 2, 3은 크기가 아니라 무엇을 나타낸다고 했나요? numeric으로 두면 오렌지3는 이 문제를 회귀로 생각합니다.</details>
+  </div>
+</section>
+
+<!-- 활동 3 -->
+<section class="act" id="a3">
+  <div class="act-h"><span class="no">활동 3</span><h2>그래프로 데이터 살펴보기</h2><span class="tool">Distributions · Scatter Plot</span></div>
+  <div class="read"><p>의사가 태아를 직접 진찰하기 어려우니, 여러 데이터를 모아 건강 상태를 판단해야 합니다. 어떤 속성이 건강 상태를 잘 구분하는지 그래프로 살펴봅시다.</p></div>
+
+  <h3>① Distributions: 속성별로 값이 어떻게 퍼져 있을까?</h3>
+  <ol class="steps">
+    <li>File 위젯 오른쪽 곡선을 끌어 빈 곳에 놓고, 목록에서 <b>Distributions</b>를 고릅니다.</li>
+    <li>왼쪽 <b>Variable</b> 목록에서 살펴볼 속성을 고릅니다.</li>
+    <li>아래 <b>Split by</b>를 <code>fetal_health</code>로 바꾸면 정상(1)·주의(2)·나쁨(3)이 서로 다른 색으로 그려집니다. <b>Fitted distribution</b>을 Normal로 하면 부드러운 곡선으로 볼 수 있습니다.</li>
+  </ol>
+  <div class="figs">
+    <figure class="fig"><img src="img/fh-dist-add.jpg" alt="Distributions 위젯 추가"><figcaption>[그림 6-7] Distributions 위젯 추가하기</figcaption></figure>
+    <figure class="fig"><img src="img/fh-dist-window.jpg" alt="Distributions 창"><figcaption>[그림 6-8] Distributions 창</figcaption></figure>
+  </div>
+  <p class="tip"><b>읽는 법</b> 세 가지 색의 산이 <b>서로 떨어져 있을수록</b> 그 속성 하나만 보고도 건강 상태를 잘 구분할 수 있다는 뜻이에요. 산이 많이 <b>겹치면</b> 그 속성만으로는 구분하기 어려워요.</p>
+  <div class="tbl"><table>
+    <thead><tr><th style="width:44%">분포 그래프</th><th>해석</th></tr></thead>
+    <tbody>
+      <tr><td><img src="img/fh-dist-baseline.jpg" alt="baseline value 분포" style="width:100%;display:block"></td><td><b>baseline value</b> (기준 태아 심박 수)<br>정상(1)과 나쁨(3)의 평균이 거의 같고 겹치는 값이 많아, 이 속성 하나만으로 분류하기는 어렵다.</td></tr>
+      <tr><td><img src="img/fh-dist-accel.jpg" alt="accelerations 분포" style="width:100%;display:block"></td><td><b>accelerations</b> (초당 심박 가속 횟수)<br>주의(2)와 나쁨(3)의 평균이 거의 같고 겹치는 값이 많아, 이 속성 하나만으로 분류하기는 어렵다.</td></tr>
+      <tr><td><img src="img/fh-dist-movement.jpg" alt="fetal_movement 분포" style="width:100%;display:block"></td><td><b>fetal_movement</b> (초당 태아 움직임 횟수)<br>정상(1)과 주의(2)의 평균이 거의 같고 겹치는 값이 많아, 이 속성 하나만으로 분류하기는 어렵다.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="q">
+    <p class="qt" data-n="Q5.">Distributions에서 다른 속성도 직접 골라 보고, 세 가지 색이 가장 잘 나뉘어 보이는 속성과 그렇게 생각한 까닭을 써 봅시다.</p>
+    <textarea id="q5" aria-label="Q5 답"></textarea>
+    <details class="hint"><summary>힌트</summary>이름에 abnormal(비정상)이나 variability(변동성)가 들어간 속성을 살펴보세요.</details>
+  </div>
+
+  <h3>② Scatter Plot: 속성 두 개를 함께 보면?</h3>
+  <div class="read"><p>속성 하나로 구분이 어려우면 두 개를 함께 보면 됩니다. 산점도는 x축과 y축에 속성을 하나씩 놓고 태아 한 명을 점 하나로 찍은 그래프입니다. 색이 잘 나뉘는 두 속성을 고르는 것이 중요합니다.</p></div>
+  <ol class="steps">
+    <li>File 위젯에 <b>Scatter Plot</b>을 연결하고 더블클릭합니다.</li>
+    <li><b>Color</b>를 <code>fetal_health</code>로 두고, Axis x와 Axis y를 바꿔 가며 색이 잘 나뉘는 조합을 찾아봅니다.</li>
+  </ol>
+  <figure class="fig narrow"><img src="img/fh-scatter-add.jpg" alt="Scatter Plot 위젯 추가"><figcaption>[그림 6-9] Distributions, Scatter Plot 연결</figcaption></figure>
+  <div class="figs">
+    <figure class="fig"><img src="img/fh-scatter-good.jpg" alt="잘 구분되는 산점도"><figcaption>abnormal_short_term_variability × mean_value_of_short_term_variability: 색이 비교적 잘 나뉜다.</figcaption></figure>
+    <figure class="fig"><img src="img/fh-scatter-bad.jpg" alt="잘 구분되지 않는 산점도"><figcaption>baseline value × fetal_movement: 색이 뒤섞여 잘 나뉘지 않는다.</figcaption></figure>
+  </div>
+  <div class="read"><p>속성이 11개나 되면 두 개씩 짝지은 조합을 하나하나 다 그려 보기는 어렵습니다. 이럴 때 Scatter Plot의 <b>Find Informative Projections</b>(정보가 많은 조합 찾기)를 누르면, 오렌지3가 색이 잘 나뉘는 조합을 점수 순서대로 추천해 줍니다. 목록에서 한 줄을 누르면 산점도가 그 조합으로 바뀝니다.</p></div>
+  <figure class="fig"><img src="img/fh-projections.jpg" alt="Find Informative Projections 추천 결과"><figcaption>Find Informative Projections 추천 결과</figcaption></figure>
+  <div class="figs">
+    <figure class="fig"><img src="img/fh-proj-1.jpg" alt="추천 1순위 산점도"><figcaption>1순위: abnormal_short_term_variability × baseline value</figcaption></figure>
+    <figure class="fig"><img src="img/fh-proj-3.jpg" alt="추천 3순위 산점도"><figcaption>3순위: abnormal_short_term_variability × percentage_of_time_with_abnormal_long_term_variability</figcaption></figure>
+  </div>
+  <div class="q">
+    <p class="qt" data-n="Q6.">baseline value는 혼자서는 건강 상태를 잘 구분하지 못했는데, Find Informative Projections 1순위에는 abnormal_short_term_variability와 함께 들어 있습니다. 왜 그럴까요?</p>
+    <textarea id="q6" aria-label="Q6 답"></textarea>
+    <details class="hint"><summary>힌트</summary>1순위 산점도에서 x축(가로)만 볼 때와 y축(세로)까지 함께 볼 때를 비교해 보세요. 속성 하나로 안 되던 구분이 두 개를 함께 보면 될 수도 있습니다.</details>
+  </div>
+</section>
+
+<!-- 활동 4 -->
+<section class="act" id="a4">
+  <div class="act-h"><span class="no">활동 4</span><h2>중요한 속성 고르기</h2><span class="tool">Rank</span></div>
+  <div class="read">
+    <p><b>Rank</b>는 속성마다 건강 상태와 관련이 큰 정도를 점수로 매겨 순서대로 보여 줍니다. 이번처럼 target이 종류(분류)일 때는 <b>Information Gain</b>(정보 이득), <b>Gain Ratio</b>(정보 이득 비율), <b>Gini Decrease</b>(지니 감소) 같은 점수를 씁니다. 모두 "이 속성을 알면 건강 상태를 얼마나 더 잘 나눌 수 있는가"를 나타내고, 점수가 높을수록 중요한 속성입니다.</p>
+    <p>File에 <b>Rank</b>를 연결하고, 왼쪽 아래 Select Attributes에서 <b>Best ranked</b>를 고른 뒤 숫자를 <b>6</b>으로 정합니다. 그러면 상위 6개 속성만 다음 위젯으로 보내집니다.</p>
+  </div>
+  <figure class="fig narrow"><img src="img/fh-rank.jpg" alt="Rank 위젯 결과"><figcaption>[그림 6-10] Rank 위젯 (Best ranked: 6)</figcaption></figure>
+  <div class="q">
+    <p class="qt" data-n="Q7.">Rank 결과를 보고 빈칸을 채워 봅시다.</p>
+    <p>Gain Ratio 점수가 가장 높은 속성은 <input class="blank" id="k1" data-ans="severe_decelerations|severedecelerations" aria-label="1위 속성" style="width:13em">이고, 모델 학습에는 상위 <input class="blank" id="k2" data-ans="6|6개" inputmode="numeric" aria-label="사용할 속성 수" style="width:4em">개 속성만 사용한다.</p>
+    <div class="check"><button type="button" data-check="k1,k2">정답 확인</button><span class="result" id="r-k1"></span></div>
+  </div>
+</section>
+
+<!-- 활동 5 -->
+<section class="act" id="a5">
+  <div class="act-h"><span class="no">활동 5</span><h2>분류 모델 학습하고 성능 평가하기</h2><span class="tool">kNN · Random Forest · SVM · Logistic Regression · Neural Network · Test and Score</span></div>
+  <ol class="steps">
+    <li>Model 묶음에서 분류에 자주 쓰는 <b>kNN, Random Forest, SVM, Logistic Regression, Neural Network</b>를 캔버스에 놓고 모두 <b>Rank</b>와 연결합니다. Rank에서 고른 6개 속성으로 학습하게 됩니다.</li>
+    <li>Evaluate 묶음의 <b>Test and Score</b>를 놓고 다섯 모델과 Rank(데이터)를 모두 연결합니다.</li>
+    <li>Test and Score에서 <b>Random sampling</b>을 고르고 Repeat train/test를 <b>10</b>, Training set size를 <b>70%</b>로 정합니다.</li>
+  </ol>
+  <figure class="fig"><img src="img/fh-model-flow.jpg" alt="다섯 모델을 Test and Score에 연결한 워크플로"><figcaption>[그림 6-11] 모델 학습 워크플로</figcaption></figure>
+  <div class="concept">
+    <h3>알아두기 · 분류 모델의 성적표 CA</h3>
+    <p><b>CA</b>(Classification Accuracy, 분류 정확도)는 전체 중에서 맞힌 비율입니다. 1에 가까울수록 잘 맞힌 모델입니다. 0.9라면 100명 중 90명의 건강 상태를 맞혔다는 뜻입니다.</p>
+    <p class="mono" style="text-align:center;font-size:1rem">CA = 맞힌 개수 ÷ 전체 개수</p>
+    <p>Test and Score에는 AUC, F1, Precision(정밀도), Recall(재현율)도 함께 나옵니다. 오늘은 CA를 기준으로 비교합니다.</p>
+  </div>
+  <figure class="fig"><img src="img/fh-testscore.jpg" alt="Test and Score 결과"><figcaption>[그림 6-12] Test and Score 결과 예시</figcaption></figure>
+  <div class="q">
+    <p class="qt" data-n="Q8.">내 Test and Score 결과에서 CA를 적어 봅시다. (소수 셋째 자리까지)</p>
+    <div class="tbl"><table>
+      <thead><tr><th>Model</th><th class="num">CA</th></tr></thead>
+      <tbody>
+        <tr><td>kNN</td><td class="num"><input class="blank" id="ca1" inputmode="decimal" aria-label="kNN CA"></td></tr>
+        <tr><td>Random Forest</td><td class="num"><input class="blank" id="ca2" inputmode="decimal" aria-label="Random Forest CA"></td></tr>
+        <tr><td>SVM</td><td class="num"><input class="blank" id="ca3" inputmode="decimal" aria-label="SVM CA"></td></tr>
+        <tr><td>Logistic Regression</td><td class="num"><input class="blank" id="ca4" inputmode="decimal" aria-label="Logistic Regression CA"></td></tr>
+        <tr><td>Neural Network</td><td class="num"><input class="blank" id="ca5" inputmode="decimal" aria-label="Neural Network CA"></td></tr>
+      </tbody>
+    </table></div>
+    <p>CA가 가장 높은 모델은 <select id="bestm" data-ans="Random Forest" aria-label="가장 좋은 모델"><option value="">선택</option><option>kNN</option><option>Random Forest</option><option>SVM</option><option>Logistic Regression</option><option>Neural Network</option></select> 이다.</p>
+    <div class="check"><button type="button" data-check="bestm">정답 확인</button><span class="result" id="r-bestm"></span></div>
+  </div>
+
+  <h3>Confusion Matrix: 어떤 경우를 맞히고 어떤 경우를 틀렸을까?</h3>
+  <ol class="steps">
+    <li>Evaluate 묶음의 <b>Confusion Matrix</b>(혼동 행렬)를 Test and Score에 연결하고 더블클릭합니다.</li>
+    <li>왼쪽 Learners에서 모델을 고르면, 그 모델의 예측 결과가 표로 나옵니다. <b>세로줄(Actual)은 실제 상태, 가로줄(Predicted)은 모델이 예측한 상태</b>입니다.</li>
+    <li>왼쪽 위에서 오른쪽 아래로 이어지는 <b>대각선 칸이 맞힌 개수</b>, 나머지 칸이 틀린 개수입니다.</li>
+  </ol>
+  <div class="figs">
+    <figure class="fig"><img src="img/fh-cm-add.jpg" alt="Confusion Matrix 위젯 추가"><figcaption>[그림 6-13] Confusion Matrix 연결</figcaption></figure>
+    <figure class="fig"><img src="img/fh-cm-result.jpg" alt="Random Forest의 Confusion Matrix"><figcaption>[그림 6-14] Random Forest의 Confusion Matrix</figcaption></figure>
+  </div>
+  <p class="result">전체가 6,380개인 까닭: 2,126개 중 30%(약 638개)를 시험용으로 쓰는 일을 10번 되풀이했기 때문입니다.</p>
+  <div class="q">
+    <p class="qt" data-n="Q9.">그림 6-14의 Random Forest 결과를 보고 빈칸을 채워 봅시다.</p>
+    <p>정상(1)을 맞힌 개수 <input class="blank" id="cm1" data-ans="4838|4,838" inputmode="numeric" aria-label="정상 맞힌 개수">, 주의(2)를 맞힌 개수 <input class="blank" id="cm2" data-ans="613" inputmode="numeric" aria-label="주의 맞힌 개수">, 나쁨(3)을 맞힌 개수 <input class="blank" id="cm3" data-ans="440" inputmode="numeric" aria-label="나쁨 맞힌 개수"></p>
+    <p>CA = 맞힌 개수의 합 ÷ 6,380 ≈ <input class="blank" id="cm4" data-ans="0.923|.923|0.92|92.3|92.3%" inputmode="decimal" aria-label="계산한 CA"> (소수 셋째 자리까지)</p>
+    <div class="check"><button type="button" data-check="cm1,cm2,cm3,cm4">정답 확인</button><span class="result" id="r-cm1"></span></div>
+  </div>
+  <div class="q">
+    <p class="qt" data-n="Q10.">실제로 '주의(2)'인 태아 880명 중 252명을 모델이 '정상(1)'으로 잘못 예측했습니다. 전체 정확도가 높아도 이런 실수가 왜 위험한지 써 봅시다.</p>
+    <textarea id="q10" aria-label="Q10 답"></textarea>
+    <details class="hint"><summary>힌트</summary>세로줄 합계를 보면 정상 4,970, 주의 880, 나쁨 530입니다. 데이터의 대부분이 정상이면 모델은 어느 쪽을 더 잘 맞히게 될까요? 주의가 필요한 태아를 정상으로 판단하면 어떤 일이 생길까요?</details>
+  </div>
+</section>
+
+<!-- 활동 6 -->
+<section class="act" id="a6">
+  <div class="act-h"><span class="no">활동 6</span><h2>건강 상태 예측하기</h2><span class="tool">Predictions</span></div>
+  <ol class="steps">
+    <li>Evaluate 묶음의 <b>Predictions</b>를 놓고, 학습시킨 다섯 모델과 <b>Rank</b>(데이터)를 연결합니다.</li>
+    <li>Predictions를 더블클릭하면 태아마다 모델이 예측한 건강 상태와 실제 fetal_health를 나란히 볼 수 있습니다. <b>0.00 : 1.00 : 0.00</b>은 정상·주의·나쁨일 확률입니다.</li>
+  </ol>
+  <figure class="fig"><img src="img/fh-pred-add.jpg" alt="Predictions 위젯 연결"><figcaption>[그림 6-15] Predictions 연결</figcaption></figure>
+  <figure class="fig"><img src="img/fh-pred-result.jpg" alt="Predictions 결과"><figcaption>[그림 6-16] Predictions 결과 (아래쪽에 모델별 평가 지표)</figcaption></figure>
+  <div class="q">
+    <p class="qt" data-n="Q11.">Predictions 1번 태아의 실제 상태는 2(주의)입니다. Random Forest는 1번 태아를 무엇으로 예측했나요?</p>
+    <p><select id="p1" data-ans="2 (주의)" aria-label="1번 태아 예측"><option value="">선택</option><option>1 (정상)</option><option>2 (주의)</option><option>3 (나쁨)</option></select></p>
+    <div class="check"><button type="button" data-check="p1">정답 확인</button><span class="result" id="r-p1"></span></div>
+  </div>
+  <div class="q">
+    <p class="qt" data-n="Q12.">Predictions 아래 평가표에서 Random Forest의 CA는 0.970으로, Test and Score의 0.923보다 높습니다. 왜 더 높게 나왔을까요?</p>
+    <textarea id="q12" aria-label="Q12 답"></textarea>
+    <details class="hint"><summary>힌트</summary>Predictions에 연결한 데이터는 모델이 학습할 때 이미 본 데이터일까요, 처음 보는 데이터일까요? 1번 학습지 Q10을 떠올려 보세요.</details>
+  </div>
+</section>
+
+<!-- 정리 -->
+<section class="act" id="a7">
+  <div class="act-h"><span class="no">정리하기</span><h2>오늘 배운 것</h2></div>
+  <div class="concept">
+    <h3>데이터 → 탐색 → 속성 고르기 → 분류 모델 → 평가 → 예측</h3>
+    <p>태아 심박동 검사 데이터로 건강 상태를 정상·주의·나쁨 중 하나로 맞히는 분류 모델을 만들었습니다. 예시 결과에서는 Random Forest의 성능이 가장 좋았습니다.</p>
+  </div>
+  <div class="q">
+    <p class="qt" data-n="Q13.">0·1번 학습지(회귀)와 오늘(분류)을 비교해, 맞히려는 값과 성능을 평가하는 지표가 어떻게 달랐는지 정리해 봅시다.</p>
+    <textarea id="q13" aria-label="Q13 답"></textarea>
+  </div>
+  <div class="q">
+    <p class="qt" data-n="Q14.">이 모델이 어떤 태아를 '나쁨'이라고 예측했다면, 그 결과만 믿고 판단해도 될까요? 병원에서 이런 인공지능을 쓸 때 의사와 인공지능은 각각 어떤 역할을 해야 할지 써 봅시다.</p>
+    <textarea id="q14" aria-label="Q14 답"></textarea>
+  </div>
+  <div class="q">
+    <p class="qt" data-n="자기평가">해당하는 만큼 별을 눌러 봅시다.</p>
+    <div class="self" id="self"></div>
+  </div>
+</section>
+
+<footer class="foot">
+  <span>밍티의 AI 교실 · 학습지 2 · 원자료: 황상연(상모중), 『데이터 기반 인공지능 교육 자료』 · 데이터: Kaggle Fetal Health Classification</span>
+  <div class="btns"><span class="toast" id="toast" aria-live="polite"></span><button type="button" id="pdfBtn" class="pdf">PDF로 내려받기</button><button type="button" id="copyAll">답안 복사하기</button><button type="button" id="clearAll">모두 지우기</button></div>
+</footer>
+</div>
+
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const KEY="fetal-health-ws-v1";
+  let store={};try{store=JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){}
+  const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}};
+  const norm=s=>String(s).trim().toLowerCase().replace(/\s+/g,"");
+
+  // 생성 문항
+  const selfItems=["그래프로 건강 상태를 잘 구분하는 속성을 찾을 수 있다.","여러 분류 모델을 학습시키고 CA로 비교할 수 있다.","Confusion Matrix를 읽고 모델이 틀린 경우를 설명할 수 있다."];
+  $("self").innerHTML=selfItems.map((t,i)=>`<div class="row"><span>${t}</span><div class="stars" data-i="${i}">${[1,2,3,4,5].map(n=>`<button type="button" data-n="${n}" aria-label="${n}점">★</button>`).join("")}</div></div>`).join("");
+
+  // 저장/복원
+  const fields=()=>document.querySelectorAll(".sheet input, .sheet textarea, .sheet select");
+  fields().forEach(el=>{
+    const k=el.id;if(!k)return;
+    if(k in store){el.type==="checkbox"?el.checked=!!store[k]:el.value=store[k];}
+    el.addEventListener(el.tagName==="SELECT"||el.type==="checkbox"?"change":"input",()=>{store[k]=el.type==="checkbox"?el.checked:el.value;el.classList.remove("ok","no-");save();});
+  });
+  const paintStars=()=>document.querySelectorAll(".stars").forEach(s=>{const v=store["self"+s.dataset.i]||0;s.querySelectorAll("button").forEach(b=>b.classList.toggle("on",+b.dataset.n<=v))});
+  document.querySelectorAll(".stars").forEach(s=>s.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;store["self"+s.dataset.i]=+b.dataset.n;save();paintStars();}));
+  paintStars();
+
+  // 채점
+  const mark=(el,ok)=>{el.classList.toggle("ok",ok);el.classList.toggle("no-",!ok);return ok};
+  const report=(id,g,t)=>{$(id).textContent=`${t}개 중 ${g}개 맞았어요.`+(g===t?" 잘했어요!":" 빨간 칸을 다시 확인해 보세요.")};
+  const isRight=el=>el.dataset.ans.split("|").map(norm).includes(norm(el.value));
+  document.querySelectorAll("[data-check]").forEach(btn=>btn.addEventListener("click",()=>{
+    const ids=btn.dataset.check.split(",");let g=0;ids.forEach(id=>{if(mark($(id),isRight($(id))))g++});report("r-"+ids[0],g,ids.length);
+  }));
+  document.querySelectorAll("[data-check-group]").forEach(btn=>btn.addEventListener("click",()=>{
+    const p=btn.dataset.checkGroup;const els=[...document.querySelectorAll(`select[id^="${p}-"]`)];let g=0;els.forEach(el=>{if(mark(el,isRight(el)))g++});report("r-"+p,g,els.length);
+  }));
+
+  document.querySelectorAll(".copyurl").forEach(b=>b.addEventListener("click",()=>{const t=$(b.dataset.target).textContent;
+    const done=()=>{b.textContent="복사됨";setTimeout(()=>b.textContent="주소 복사",1500)};
+    try{navigator.clipboard.writeText(t).then(done,()=>{const r=document.createRange();r.selectNodeContents($(b.dataset.target));getSelection().removeAllRanges();getSelection().addRange(r)})}catch(e){}}));
+  // 복사·지우기·PDF
+  const toast=m=>{$("toast").textContent=m;setTimeout(()=>$("toast").textContent="",2500)};
+  $("copyAll").onclick=()=>{
+    const lines=[`[태아 건강 예측 학습지] ${$("sid").value} ${$("sname").value} (${$("sdate").value})`];
+    fields().forEach(el=>{if(!el.id||["sid","sname","sdate"].includes(el.id))return;const label=el.getAttribute("aria-label")||el.closest("label")?.textContent.trim()||el.id;
+      const v=el.type==="checkbox"?(el.checked?"예":"아니오"):el.value;lines.push(`${label}: ${v}`)});
+    lines.push("자기평가: "+selfItems.map((t,i)=>(store["self"+i]||0)+"점").join(", "));
+    const text=lines.join("\n");
+    const fallback=()=>{const ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");toast("복사했어요")}catch(e){toast("복사가 안 되면 직접 선택해 주세요")}ta.remove()};
+    try{navigator.clipboard.writeText(text).then(()=>toast("복사했어요. 제출 칸에 붙여 넣으세요"),fallback)}catch(e){fallback()}
+  };
+  let armed=false;
+  $("clearAll").onclick=()=>{
+    if(!armed){armed=true;$("clearAll").textContent="한 번 더 누르면 지워져요";setTimeout(()=>{armed=false;$("clearAll").textContent="모두 지우기"},3000);return}
+    store={};save();fields().forEach(el=>{el.type==="checkbox"?el.checked=false:el.value="";el.classList.remove("ok","no-")});
+    document.querySelectorAll(".result").forEach(r=>r.textContent="");paintStars();armed=false;$("clearAll").textContent="모두 지우기";toast("모두 지웠어요");
+  };
+  $("pdfBtn").onclick=async()=>{
+    const btn=$("pdfBtn");btn.disabled=true;btn.textContent="PDF 만드는 중…";
+    const who=[$("sid").value.trim(),$("sname").value.trim()].filter(Boolean).join("_")||"학습지";
+    const opt={margin:[10,8,10,8],filename:`${who}_태아건강예측학습지.pdf`,image:{type:"jpeg",quality:0.92},
+      html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",scrollX:0,scrollY:0,onclone:doc=>{
+        doc.body.classList.add("pdfmode");
+        doc.querySelectorAll("input").forEach(i=>{const o=document.getElementById(i.id);if(!o)return;if(i.type==="checkbox")i.checked=o.checked;else{i.value=o.value;i.setAttribute("value",o.value)}});
+        doc.querySelectorAll("textarea").forEach(t=>{const o=document.getElementById(t.id);const d=doc.createElement("div");d.className="ta-print";d.textContent=(o?o.value:t.value)||" ";t.replaceWith(d)});
+        doc.querySelectorAll("select").forEach(s=>{const o=document.getElementById(s.id);const sp=doc.createElement("span");sp.className="sel-print";sp.textContent=(o?o.value:s.value)||"(선택 안 함)";s.replaceWith(sp)});
+        doc.querySelectorAll(".mock .canvas").forEach(c=>c.style.background="#f7f9fa");
+      }},
+      jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},
+      pagebreak:{mode:["css","legacy"],avoid:[".q",".concept","tr",".act-h",".fig",".tip"]}};
+    try{
+      if(!window.html2pdf)throw new Error("no lib");
+      const sy=window.scrollY;window.scrollTo(0,0);
+      await html2pdf().set(opt).from(document.querySelector(".sheet")).save();
+      window.scrollTo(0,sy);toast("PDF를 내려받았어요");
+    }catch(e){toast("인쇄 창에서 'PDF로 저장'을 골라 주세요");try{window.print()}catch(_){}}
+    finally{btn.disabled=false;btn.textContent="PDF로 내려받기"}
+  };
+})();
+</script>
+</body>
+</html>
