@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>예시 답안</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="img/mingti-pixel.png">
+<style>
+@font-face{font-family:"Galmuri11";src:url("fonts/Galmuri11.woff2") format("woff2");font-weight:400}
+@font-face{font-family:"Galmuri11";src:url("fonts/Galmuri11-Bold.woff2") format("woff2");font-weight:700}
+/* Layout: 편집기와 같은 도구 막대 + 그 아래 실제 학습지에 예시 답안을 채워 보여 주는 화면 */
+:root{color-scheme:light;--line:#33506b;--brown:#8a5a3c;--pink:#f2a3b4;--cream:#fbf4e2;--white:#fff;--ok:#2c7a3f;--no:#b4381c;--pixel:"Galmuri11",system-ui,sans-serif}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;height:100%}
+body{display:flex;flex-direction:column;background:#e4e8eb;color:var(--line);font-family:var(--pixel);font-size:14px}
+.tb{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;background:var(--cream);border-bottom:4px solid var(--line);
+  padding-block:calc(env(safe-area-inset-top,0px) + 8px) 8px;padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
+.tb a.back{color:var(--line);text-decoration:none;font-weight:700}
+.tb .name{font-weight:700;color:var(--brown)}
+.tb .status{font-size:.82rem;color:#5f7488}
+.tb .status.dirty{color:var(--no)} .tb .status.ok{color:var(--ok)}
+.tools{display:flex;flex-wrap:wrap;gap:6px;margin-left:auto;align-items:center}
+button,.btn{font:inherit;font-size:.85rem;padding:5px 12px;background:var(--white);color:var(--line);border:0;cursor:pointer;text-decoration:none;
+  box-shadow:0 -2px 0 0 var(--line),0 2px 0 0 var(--line),-2px 0 0 0 var(--line),2px 0 0 0 var(--line);margin:2px}
+button:hover,.btn:hover{background:#fde3e9}
+button:focus-visible,.btn:focus-visible{outline:3px dashed var(--pink);outline-offset:4px}
+button.primary{background:var(--brown);color:var(--white)}
+button.primary:hover{background:#6f462e}
+button.on{background:#fde3e9}
+button:disabled{opacity:.5;cursor:not-allowed}
+.bar{display:grid;gap:6px;padding:8px 12px;font-size:.85rem;border-bottom:2px solid var(--line)}
+.bar.info{background:var(--white);color:#5f7488}
+.bar.connect{background:#fff4e0}
+.bar.err{background:#fbe7e1;color:var(--no);border-bottom-color:var(--no)}
+.inline{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.connect input{font:inherit;padding:6px 8px;border:0;box-shadow:inset 0 0 0 2px var(--line);flex:1 1 260px;min-width:0;background:#fff;color:var(--line)}
+iframe{flex:1;width:100%;border:0;background:#e4e8eb}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);transform:translateX(-50%);background:var(--line);color:var(--white);padding:8px 16px;font-size:.88rem;max-width:calc(100% - 32px)}
+</style>
+</head>
+<body>
+<header class="tb">
+  <a class="back" href="teacher.html">← 선생님 화면</a>
+  <span class="name" id="fname">불러오는 중…</span>
+  <span class="status" id="status"></span>
+  <div class="tools">
+    <button type="button" id="bEdit">예시 답안 고치기</button>
+    <button type="button" id="bPdf">PDF로 내려받기</button>
+    <a class="btn" id="bView" target="_blank" rel="noopener">학생 화면 보기</a>
+    <button type="button" class="primary" id="bSave" hidden>GitHub에 저장</button>
+  </div>
+</header>
+<div class="bar info" id="info">학생 학습지에 예시 답안과 지도 팁을 채워 보여 주는 화면이에요. 학습지 글씨를 고치면 여기에도 바로 반영돼요.</div>
+<div class="bar connect" id="connect" hidden>
+  <b>GitHub에 연결해야 저장할 수 있어요.</b>
+  <div class="inline"><input type="password" id="tok" autocomplete="off" placeholder="github_pat_..."><button type="button" class="primary" id="tokGo">연결하고 저장</button><a class="btn" href="teacher.html" target="_blank" rel="noopener">토큰 만드는 방법</a></div>
+  <span id="cmsg" aria-live="polite"></span>
+</div>
+<div class="bar err" id="err" role="alert" hidden><span><b>저장하지 못했어요.</b> <span id="errMsg"></span></span></div>
+<iframe id="fr" title="예시 답안이 채워진 학습지"></iframe>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function(){
+  const OWNER="gus-wn",REPO="orange3_mintea",BRANCH="main",TOKEN_KEY="mintea-gh-token";
+  const FILES={"worksheet0.html":"0. Orange3로 해보는 데이터 분석","worksheet.html":"1. 개인에 관한 신상정보로 소득 정도를 예측할 수 있을까?"};
+  const SKIP=new Set(["sid","sname","sdate","rs","picker"]);
+  const $=id=>document.getElementById(id);
+  const file=new URLSearchParams(location.search).get("file")||"worksheet0.html";
+  const title=FILES[file];
+  const ansPath="answers/"+file.replace(/\.html$/,".json");
+  const fr=$("fr");
+  let data={fields:{},notes:{}},sha=null,editing=false,dirty=false;
+
+  const toast=(m,ms=3000)=>{$("toast").textContent=m;$("toast").hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>$("toast").hidden=true,ms)};
+  const setStatus=(m,c="")=>{$("status").textContent=m;$("status").className="status "+c};
+  const token=()=>{try{return localStorage.getItem(TOKEN_KEY)||""}catch(e){return""}};
+  const markDirty=()=>{if(editing&&!dirty){dirty=true;setStatus("저장 안 한 변경이 있어요","dirty")}};
+  window.addEventListener("beforeunload",e=>{if(dirty){e.preventDefault();e.returnValue=""}});
+  if(!title){$("fname").textContent="예시 답안이 없는 파일이에요";return}
+  $("fname").textContent=title+" · 예시 답안";document.title=title+" 예시 답안";$("bView").href=file;
+
+  const b64ToText=s=>new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\s/g,"")),c=>c.charCodeAt(0)));
+  const textToB64=t=>{const b=new TextEncoder().encode(t);let s="";for(let i=0;i<b.length;i+=0x8000)s+=String.fromCharCode.apply(null,b.subarray(i,i+0x8000));return btoa(s)};
+  async function gh(path,opt={}){
+    const url=`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`+(opt.method?"":`?ref=${BRANCH}&t=${Date.now()}`);
+    const r=await fetch(url,{method:opt.method||"GET",cache:"no-store",headers:{"Accept":"application/vnd.github+json","Authorization":"Bearer "+token()},body:opt.body});
+    if(!r.ok){const e=await r.json().catch(()=>({}));throw Object.assign(new Error(e.message||("HTTP "+r.status)),{status:r.status})}
+    return r.json();
+  }
+  const explain=e=>e.status===401?"토큰이 맞지 않거나 만료됐어요. 다시 연결해 주세요."
+    :e.status===403||e.status===404?"이 토큰에는 저장소에 쓸 권한이 없어요. Contents: Read and write 권한을 확인해 주세요."
+    :e.status===409?"다른 곳에서 먼저 고친 내용이 있어요. 새로고침한 뒤 다시 고쳐 주세요."
+    :e instanceof TypeError?"GitHub에 접속하지 못했어요. 인터넷 연결을 확인해 주세요."
+    :"GitHub 오류: "+e.message;
+
+  async function loadAnswers(){
+    try{
+      if(token()){const j=await gh(ansPath);sha=j.sha;data=JSON.parse(b64ToText(j.content))}
+      else{const r=await fetch(ansPath+"?t="+Date.now(),{cache:"no-store"});if(r.ok)data=await r.json()}
+    }catch(e){if(e.status!==404)setStatus("예시 답안을 불러오지 못했어요: "+explain(e),"dirty")}
+    data.fields=data.fields||{};data.notes=data.notes||{};
+  }
+
+  const CSS=`.keybanner{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;background:#e2f0f2;color:#17697a;border:1.5px solid #17697a;border-radius:6px;padding:10px 14px;font-size:.9rem}
+.keybanner b{font-family:var(--hand);font-size:1.3rem;font-weight:400}
+.keymode input.key-fill,.keymode select.key-fill,.keymode textarea.key-fill{color:#17697a}
+.keymode textarea.key-fill{overflow:hidden}
+.keymode .check .result{color:#17697a}
+.keynote{display:grid;gap:4px;background:#e2f0f2;border-left:4px solid #17697a;border-radius:4px;padding:8px 12px;font-size:.92rem;color:#1c2830}
+.keynote>b{font-family:var(--hand);font-weight:400;color:#17697a;font-size:1.05rem}
+.keynote .kn-text{white-space:pre-wrap;outline:none}
+.keynote.empty{display:none}
+.keyedit .keynote.empty{display:grid}
+.keyedit .keynote .kn-text{outline:1px dashed #17697a;outline-offset:2px;min-height:1.6em;cursor:text;background:#fff}
+.keyedit .keynote .kn-text:empty::before{content:"지도 팁을 적어 주세요 (비워 두면 표시되지 않아요)";color:#8aa}
+.keymode #clearAll,.keymode #copyAll{display:none!important}`;
+
+  function fill(d){
+    const root=d.querySelector(".sheet");
+    // 1) 학습지에 들어 있는 자동 채점 정답
+    root.querySelectorAll("[data-ans]").forEach(el=>{
+      if(!el.id||SKIP.has(el.id))return;
+      const a=el.dataset.ans.split("|")[0];
+      if(el.tagName==="SELECT"){if(![...el.options].some(o=>o.value===a||o.text===a))return}
+      el.value=a;el.classList.add("key-fill");
+    });
+    // 2) 저장해 둔 예시 답안
+    for(const [id,v] of Object.entries(data.fields)){
+      const el=d.getElementById(id);if(!el||SKIP.has(id))continue;
+      if(el.type==="checkbox")el.checked=!!v;else el.value=v;
+      el.classList.add("key-fill");
+    }
+    d.getElementById("sid")&&(d.getElementById("sid").value="예시 답안");
+    d.getElementById("sname")&&(d.getElementById("sname").value="교사용");
+    root.querySelectorAll("details").forEach(x=>x.open=true);
+    // 지도 팁
+    root.querySelectorAll(".q").forEach(q=>{
+      const n=q.querySelector(".qt")?.dataset.n;if(!n)return;
+      let box=q.querySelector(".keynote");
+      if(!box){box=d.createElement("div");box.className="keynote";box.innerHTML='<b>지도 팁</b><div class="kn-text"></div>';box.dataset.n=n;
+        const hint=q.querySelector("details.hint");hint?hint.before(box):q.append(box)}
+      const t=(data.notes[n]||"").trim();box.querySelector(".kn-text").textContent=t;box.classList.toggle("empty",!t);
+    });
+    grow(d);
+  }
+  const grow=d=>d.querySelectorAll("textarea").forEach(t=>{t.style.height="auto";t.style.height=(t.scrollHeight+6)+"px"});
+
+  fr.addEventListener("load",()=>{
+    const d=fr.contentDocument,w=fr.contentWindow;if(!d||!d.querySelector(".sheet"))return;
+    try{w.Storage.prototype.setItem=function(){};w.Storage.prototype.removeItem=function(){}}catch(e){}
+    const st=d.createElement("style");st.textContent=CSS;d.head.append(st);
+    d.body.classList.add("keymode");
+    const banner=d.createElement("div");banner.className="keybanner";
+    banner.innerHTML="<b>예시 답안 · 교사용</b><span>파란 글씨가 예시 답안이에요. 서술형은 한 가지 예시일 뿐이니 학생 답의 근거를 보고 판단해 주세요.</span>";
+    d.querySelector(".head").after(banner);
+    d.querySelectorAll(".home").forEach(a=>a.remove());
+    fill(d);
+    d.addEventListener("input",e=>{if(e.target.tagName==="TEXTAREA")grow(d);markDirty()});
+    d.addEventListener("change",markDirty);
+    if(!editing)setStatus("");
+  });
+
+  // 고치기 모드
+  $("bEdit").onclick=()=>{
+    editing=!editing;const d=fr.contentDocument;
+    $("bEdit").classList.toggle("on",editing);$("bEdit").textContent=editing?"고치기 끝내기":"예시 답안 고치기";
+    $("bSave").hidden=!editing;
+    d.body.classList.toggle("keyedit",editing);
+    d.querySelectorAll(".keynote .kn-text").forEach(k=>k.contentEditable=editing?"true":"false");
+    $("info").textContent=editing?"답 칸에 예시 답안을 적거나 고르고, 파란 '지도 팁' 상자의 글씨를 고친 뒤 'GitHub에 저장'을 눌러 주세요. 학생 화면에는 나타나지 않아요."
+      :"학생 학습지에 예시 답안과 지도 팁을 채워 보여 주는 화면이에요. 학습지 글씨를 고치면 여기에도 바로 반영돼요.";
+    if(!editing&&dirty)setStatus("저장 안 한 변경이 있어요","dirty");
+  };
+
+  async function save(){
+    $("err").hidden=true;
+    if(!token()){$("connect").hidden=false;$("tok").focus();return}
+    if(!dirty){toast("바뀐 내용이 없어요.");return}
+    const d=fr.contentDocument,root=d.querySelector(".sheet");
+    const fields={},notes={};
+    root.querySelectorAll("input[id],select[id],textarea[id]").forEach(el=>{
+      if(SKIP.has(el.id)||el.type==="range"||el.type==="file")return;
+      if(el.type==="checkbox"){fields[el.id]=el.checked;return}
+      const v=el.value.trim();
+      const auto=el.dataset.ans&&el.dataset.ans.split("|")[0]===v;
+      if(v&&!auto)fields[el.id]=el.value;
+    });
+    root.querySelectorAll(".keynote").forEach(k=>{const t=k.querySelector(".kn-text").innerText.trim();if(t)notes[k.dataset.n]=t});
+    const btn=$("bSave");btn.disabled=true;setStatus("저장 중…");
+    try{
+      try{const cur=await gh(ansPath);if(sha&&cur.sha!==sha)throw Object.assign(new Error("conflict"),{status:409});sha=cur.sha}catch(e){if(e.status!==404)throw e}
+      const body={message:`${title} 예시 답안 수정`,content:textToB64(JSON.stringify({fields,notes},null,1)),branch:BRANCH};if(sha)body.sha=sha;
+      const res=await gh(ansPath,{method:"PUT",body:JSON.stringify(body)});
+      sha=res.content.sha;data={fields,notes};dirty=false;
+      setStatus("저장했어요","ok");toast("예시 답안을 저장했어요!");
+      d.querySelectorAll(".keynote").forEach(k=>k.classList.toggle("empty",!k.querySelector(".kn-text").innerText.trim()));
+    }catch(e){setStatus("저장하지 못했어요","dirty");$("errMsg").textContent=explain(e);$("err").hidden=false;if(e.status===401)$("connect").hidden=false}
+    finally{btn.disabled=false}
+  }
+  $("bSave").onclick=save;
+  document.addEventListener("keydown",e=>{if(editing&&(e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="s"){e.preventDefault();save()}});
+  $("tokGo").onclick=async()=>{
+    const t=$("tok").value.trim();if(!t){$("cmsg").textContent="토큰을 붙여 넣어 주세요.";return}
+    $("cmsg").textContent="확인 중…";
+    try{
+      const r=await fetch(`https://api.github.com/repos/${OWNER}/${REPO}`,{headers:{"Accept":"application/vnd.github+json","Authorization":"Bearer "+t},cache:"no-store"});
+      const j=await r.json().catch(()=>({}));
+      if(r.status===401){$("cmsg").textContent="토큰이 맞지 않거나 만료됐어요.";return}
+      if(!r.ok||!(j.permissions&&j.permissions.push)){$("cmsg").textContent="이 토큰으로는 저장할 수 없어요. 권한을 확인해 주세요.";return}
+    }catch(e){$("cmsg").textContent="GitHub에 접속하지 못했어요.";return}
+    try{localStorage.setItem(TOKEN_KEY,t)}catch(e){}
+    $("tok").value="";$("connect").hidden=true;$("cmsg").textContent="";save();
+  };
+
+  // PDF: 학습지에 들어 있는 PDF 기능을 그대로 사용
+  $("bPdf").onclick=()=>{
+    const d=fr.contentDocument,b=d&&d.getElementById("pdfBtn");
+    if(!b){toast("학습지를 다 불러온 뒤 눌러 주세요.");return}
+    toast("PDF를 만들고 있어요. 조금만 기다려 주세요.",6000);b.click();
+  };
+
+  loadAnswers().then(()=>{fr.src=file+"?key="+Date.now()});
+})();
+</script>
+</body>
+</html>

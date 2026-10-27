@@ -14,6 +14,7 @@
 
 - `index.html` 첫 화면 (학습지 목록)
 - `worksheet.html` 학습지 1
+- `teacher.html` 선생님 화면, `editor.html` 학습지 편집기, `key.html` 예시 답안 보기·고치기 (답안 내용은 `answers/`)
 - `lesson.html` 교사용 수업 자료 (첫 화면에는 연결하지 않음)
 - `img/` 오렌지3·캐글 화면 캡처, 밍티 도트 이미지
 - `fonts/` 갈무리11 (SIL Open Font License 1.1, https://galmuri.quiple.dev)
