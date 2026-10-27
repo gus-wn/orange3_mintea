@@ -108,6 +108,9 @@ td input.blank{width:5.5em}
 .fig.narrow{max-width:520px}
 .figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;align-items:start}
 code{overflow-wrap:anywhere}
+a.dl{display:inline-block;font-family:var(--hand);font-size:1.15rem;color:#fff;background:var(--teal);padding:4px 18px;border-radius:999px;text-decoration:none}
+a.dl:hover{background:#0f5361}
+.pdfmode a.dl{background:none;color:var(--teal);padding:0}
 ul.plain{margin:0;padding-left:1.3em;display:grid;gap:6px}
 .tip{background:var(--memo);border-radius:4px;padding:10px 14px;font-size:.95rem}
 .tip b:first-child{font-family:var(--hand);color:var(--orange);font-weight:400;font-size:1.1rem;margin-right:6px}
@@ -180,7 +183,9 @@ ul.plain{margin:0;padding-left:1.3em;display:grid;gap:6px}
 <section class="act" id="a1">
   <div class="act-h"><span class="no">활동 1</span><h2>데이터 준비하기</h2><span class="tool">Kaggle</span></div>
   <div class="read">
-    <p>캐글(kaggle.com)에서 <b>Fetal Health Classification</b>을 검색해 <b>Download</b>를 누르면 <code>fetal_health.csv</code>를 내려받을 수 있습니다. 태아 심박동 검사(CTG) 기록 2,126개를 모은 데이터입니다.</p>
+    <p>아래 버튼을 눌러 캐글(Kaggle)의 <b>Fetal Health Classification</b> 페이지로 들어가, 오른쪽 위 <b>Download</b>를 누르면 <code>fetal_health.csv</code>를 내려받을 수 있습니다. 태아 심박동 검사(CTG) 기록 2,126개를 모은 데이터입니다.</p>
+    <p><a class="dl" href="https://www.kaggle.com/datasets/andrewmvd/fetal-health-classification" target="_blank" rel="noopener">캐글에서 데이터 내려받기 ↗</a></p>
+    <p class="result">내려받으려면 캐글 로그인(무료 가입, 구글 계정 사용 가능)이 필요해요. 내려받은 파일이 압축(zip)되어 있으면 압축을 풀어 주세요. 주소: https://www.kaggle.com/datasets/andrewmvd/fetal-health-classification</p>
   </div>
   <figure class="fig"><img src="img/fh-kaggle.jpg" alt="캐글 Fetal Health Classification 페이지"><figcaption>[그림 6-1] 캐글의 Fetal Health Classification 데이터 세트</figcaption></figure>
   <div class="read">

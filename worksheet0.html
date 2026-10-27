@@ -108,6 +108,19 @@ td input.blank{width:5.5em}
 .fig.narrow{max-width:520px}
 .figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;align-items:start}
 code{overflow-wrap:anywhere}
+ol.route{list-style:none;margin:0;padding:0;display:grid;gap:14px;counter-reset:none}
+ol.route>li{border:1.5px solid var(--rule);border-radius:8px;padding:14px 16px;display:grid;gap:8px;position:relative;background:var(--paper)}
+ol.route>li+li::before{content:"▼";position:absolute;top:-17px;left:22px;font-size:.75rem;color:var(--orange);line-height:1}
+.rh{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.rh .rn{width:30px;height:30px;border-radius:50%;background:var(--orange);color:#fff;display:grid;place-items:center;font-family:var(--hand);font-size:1.15rem}
+.rh b{font-family:var(--hand);font-weight:400;font-size:1.35rem}
+.rh .rq{font-size:.85rem;color:var(--muted)}
+ol.route ul,ol.route ol.sub{margin:0;padding-left:1.3em;display:grid;gap:6px;font-size:.95rem}
+ol.route ol.sub{list-style:none;padding-left:0;counter-reset:sub}
+ol.route ol.sub>li{counter-increment:sub;padding:8px 12px;background:var(--orange-soft);border-radius:6px}
+ol.route ol.sub>li::before{content:"3-" counter(sub) " ";font-family:var(--hand);color:var(--orange);font-size:1.05rem}
+.w{font-family:var(--mono);font-size:.82em;background:var(--teal-soft);color:var(--teal);padding:0 6px;border-radius:999px;white-space:nowrap}
+td.mdesc{font-size:.88rem;color:var(--muted)}
 .self{display:grid;gap:8px}
 .self .row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;border-bottom:1px dashed var(--rule);padding-bottom:6px}
 .stars{display:flex;gap:2px}
@@ -384,6 +397,62 @@ code{overflow-wrap:anywhere}
   </div>
 </section>
 
+<!-- 탐색 순서 -->
+<section class="act" id="route">
+  <div class="act-h"><span class="no">한눈에 보기</span><h2>Orange3로 데이터를 탐색하는 순서</h2></div>
+  <div class="read"><p>앞으로 어떤 데이터를 만나도 아래 순서대로 위젯을 연결하면 됩니다. 1번, 2번 학습지도 모두 이 순서를 따릅니다.</p></div>
+  <ol class="route">
+    <li>
+      <div class="rh"><span class="rn">1</span><b>데이터 전처리</b><span class="rq">분석할 수 있게 데이터를 다듬기</span></div>
+      <ul>
+        <li><b>불러오기·확인</b>: <span class="w">File</span>로 데이터를 불러오고 <span class="w">Data Table</span>로 내용을 살펴봅니다.</li>
+        <li><b>필요 없는 열 빼기</b>: <span class="w">Select Columns</span>로 일련번호처럼 쓸모없는 열을 숨깁니다.</li>
+        <li><b>이상한 행 걸러 내기</b>: <span class="w">Select Rows</span>로 잘못 들어간 값이나 필요 없는 행을 뺍니다.</li>
+        <li><b>빈칸·새 열 처리</b>: <span class="w">Impute</span>로 비어 있는 값(결측값)을 채우고, <span class="w">Feature Constructor</span>로 필요한 열을 새로 만듭니다.</li>
+      </ul>
+    </li>
+    <li>
+      <div class="rh"><span class="rn">2</span><b>상관관계 파악</b><span class="rq">어떤 속성이 결과와 관련 있을까?</span></div>
+      <ul>
+        <li><b>그래프로 보기</b>: <span class="w">Distributions</span>·<span class="w">Box Plot</span>으로 값이 퍼진 모양을, <span class="w">Scatter Plot</span>으로 두 속성의 관계를 봅니다.</li>
+        <li><b>숫자로 보기</b>: <span class="w">Correlations</span>로 상관계수를, <span class="w">Rank</span>로 결과와 관련이 큰 속성의 순위를 확인합니다.</li>
+        <li><b>속성 고르기</b>: 관련이 큰 속성만 골라 학습에 씁니다.</li>
+      </ul>
+    </li>
+    <li>
+      <div class="rh"><span class="rn">3</span><b>모델 학습</b><span class="rq">규칙을 배우게 하기</span></div>
+      <ol class="sub">
+        <li><b>타겟 변수 설정</b>: <span class="w">File</span>(또는 <span class="w">Select Columns</span>)에서 맞힐 값을 <b>target</b>, 원인이 되는 값을 <b>feature</b>, 쓰지 않을 값을 <b>skip</b>·<b>meta</b>로 정합니다. target이 숫자면 <b>회귀</b>, 종류면 <b>분류</b> 문제가 됩니다.</li>
+        <li><b>학습 데이터·테스트 데이터 나누기</b>: <span class="w">Data Sampler</span>로 데이터를 예를 들어 70%는 학습용(train), 30%는 테스트용(test)으로 나눕니다. 테스트 데이터는 모델이 공부할 때 보지 못한 <b>시험 문제</b>입니다.</li>
+        <li><b>모델 고르고 학습시키기</b>: Model 묶음에서 회귀는 <span class="w">Linear Regression</span>·<span class="w">kNN</span>·<span class="w">Random Forest</span>, 분류는 <span class="w">Logistic Regression</span>·<span class="w">Tree</span>·<span class="w">SVM</span> 등을 골라 <b>학습용 데이터</b>와 연결합니다.</li>
+      </ol>
+    </li>
+    <li>
+      <div class="rh"><span class="rn">4</span><b>결과 검증</b><span class="rq">처음 보는 데이터로 시험 보기</span></div>
+      <ul>
+        <li><b>성능 비교</b>: <span class="w">Test and Score</span>로 여러 모델을 한 번에 비교합니다. 회귀는 MSE·RMSE·MAE·R², 분류는 CA(정확도)를 봅니다. Random sampling이나 Cross validation을 고르면 이 위젯 안에서도 학습·테스트 데이터를 나눠 평가합니다.</li>
+        <li><b>틀린 경우 살피기</b>: 분류라면 <span class="w">Confusion Matrix</span>로 어떤 경우를 틀렸는지 확인합니다.</li>
+        <li><b>예측해 보기</b>: <span class="w">Predictions</span>에 모델과 <b>테스트 데이터</b>를 연결해 예측값과 실제값을 비교합니다. 학습에 쓴 데이터로 확인하면 점수가 실제보다 높게 나오니 주의하세요.</li>
+      </ul>
+    </li>
+  </ol>
+  <div class="q">
+    <p class="qt" data-n="Q14.">각 위젯은 탐색 순서의 몇 번째 단계에서 쓰일까요? 알맞은 단계를 골라 봅시다.</p>
+    <div class="tbl"><table>
+      <thead><tr><th>위젯</th><th>하는 일</th><th>단계</th></tr></thead>
+      <tbody>
+        <tr><td class="tag">Data Sampler</td><td class="mdesc">데이터를 학습용과 테스트용으로 나눈다</td><td><select id="flow-DataSampler" data-ans="3. 모델 학습" aria-label="Data Sampler 단계"><option value="">단계 고르기</option><option>1. 데이터 전처리</option><option>2. 상관관계 파악</option><option>3. 모델 학습</option><option>4. 결과 검증</option></select></td></tr>
+        <tr><td class="tag">Scatter Plot</td><td class="mdesc">두 속성의 관계를 점으로 그려 본다</td><td><select id="flow-ScatterPlot" data-ans="2. 상관관계 파악" aria-label="Scatter Plot 단계"><option value="">단계 고르기</option><option>1. 데이터 전처리</option><option>2. 상관관계 파악</option><option>3. 모델 학습</option><option>4. 결과 검증</option></select></td></tr>
+        <tr><td class="tag">Test and Score</td><td class="mdesc">여러 모델의 성능을 비교한다</td><td><select id="flow-TestandScore" data-ans="4. 결과 검증" aria-label="Test and Score 단계"><option value="">단계 고르기</option><option>1. 데이터 전처리</option><option>2. 상관관계 파악</option><option>3. 모델 학습</option><option>4. 결과 검증</option></select></td></tr>
+        <tr><td class="tag">Select Rows</td><td class="mdesc">조건에 맞지 않는 행을 걸러 낸다</td><td><select id="flow-SelectRows" data-ans="1. 데이터 전처리" aria-label="Select Rows 단계"><option value="">단계 고르기</option><option>1. 데이터 전처리</option><option>2. 상관관계 파악</option><option>3. 모델 학습</option><option>4. 결과 검증</option></select></td></tr>
+        <tr><td class="tag">Linear Regression</td><td class="mdesc">학습 방법(알고리즘)을 고른다</td><td><select id="flow-LinearRegression" data-ans="3. 모델 학습" aria-label="Linear Regression 단계"><option value="">단계 고르기</option><option>1. 데이터 전처리</option><option>2. 상관관계 파악</option><option>3. 모델 학습</option><option>4. 결과 검증</option></select></td></tr>
+        <tr><td class="tag">Correlations</td><td class="mdesc">속성끼리 함께 움직이는 정도를 계산한다</td><td><select id="flow-Correlations" data-ans="2. 상관관계 파악" aria-label="Correlations 단계"><option value="">단계 고르기</option><option>1. 데이터 전처리</option><option>2. 상관관계 파악</option><option>3. 모델 학습</option><option>4. 결과 검증</option></select></td></tr>
+      </tbody>
+    </table></div>
+    <div class="check"><button type="button" data-check-group="flow">정답 확인</button><span class="result" id="r-flow"></span></div>
+  </div>
+</section>
+
 <footer class="foot">
   <span>밍티의 AI 교실 · 학습지 0 · 참고: 생활코딩 머신러닝 야학, paul lab 「Orange3로 해보는 데이터 분석」</span>
   <div class="btns"><span class="toast" id="toast" aria-live="polite"></span><button type="button" id="pdfBtn" class="pdf">PDF로 내려받기</button><button type="button" id="copyAll">답안 복사하기</button><button type="button" id="clearAll">모두 지우기</button></div>
@@ -462,7 +531,7 @@ code{overflow-wrap:anywhere}
         doc.querySelectorAll(".mock .canvas").forEach(c=>c.style.background="#f7f9fa");
       }},
       jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},
-      pagebreak:{mode:["css","legacy"],avoid:[".q",".concept","tr",".act-h",".flow",".mock"]}};
+      pagebreak:{mode:["css","legacy"],avoid:[".q",".concept","tr",".act-h",".flow",".mock","ol.route>li"]}};
     try{
       if(!window.html2pdf)throw new Error("no lib");
       const sy=window.scrollY;window.scrollTo(0,0);
