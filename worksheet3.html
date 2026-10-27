@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>수행평가 보고서</title>
+<link rel="icon" href="img/mingti-pixel.png">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+@font-face{font-family:"BM Kkubulim";src:url("fonts/BMKkubulim.woff2") format("woff2");font-weight:normal;font-style:normal;font-display:swap}
+@font-face{font-family:"ChosunMyungjoEmbed";src:url("fonts/ChosunilboMyungjo.woff") format("woff");font-display:swap}
+@font-face{font-family:"KkubulimLocal";src:local("꾸불림체"),local("꾸불림"),local("Kkubulim")}
+/* Layout: 1번 학습지와 같은 A4 종이 한 장. 위젯 연결도는 오렌지3 캔버스를 본뜬 작은 그림으로 그린다. */
+:root{
+  color-scheme:light;
+  --desk:#e4e8eb; --paper:#ffffff; --ink:#1c2830; --muted:#5f6d75; --rule:#cfd7dc;
+  --orange:#d4621a; --orange-soft:#fdeee3; --teal:#17697a; --teal-soft:#e2f0f2;
+  --ok-soft:#e5f3e8; --no-soft:#fbe7e1; --memo:#fff7d6;
+  --w-data:#f6b26b; --w-vis:#f4a6a6; --w-model:#e8a3d6; --w-eval:#9fd8e0;
+  --hand:"BM Kkubulim","꾸불림체","Gaegu","ChosunMyungjoEmbed",cursive;
+  --serif:"조선일보명조","Chosunilbo_myungjo","ChosunMyungjoEmbed","Nanum Myeongjo","AppleMyungjo","Batang",serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--desk);color:var(--ink);font-family:var(--serif);font-size:16.5px;line-height:1.75;word-break:keep-all;overflow-wrap:anywhere;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:calc(env(safe-area-inset-top,0px) + 28px) calc(env(safe-area-inset-bottom,0px) + 64px)}
+.sheet{max-width:860px;margin:0 auto;background:var(--paper);border-radius:4px;box-shadow:0 1px 3px rgba(20,30,40,.12),0 12px 32px rgba(20,30,40,.08);padding:clamp(20px,5vw,56px);display:grid;gap:44px}
+h1,h2,h3{font-family:var(--hand);font-weight:400;margin:0;text-wrap:balance;line-height:1.25}
+p{margin:0}
+code,.mono{font-family:var(--mono);font-size:.86em}
+code{background:var(--teal-soft);color:var(--teal);padding:0 5px;border-radius:3px}
+a{color:var(--teal)}
+
+.head{display:grid;gap:18px;border-bottom:3px double var(--ink);padding-bottom:22px}
+.course{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 16px;font-size:.85rem;color:var(--muted)}
+.home{color:var(--teal);text-decoration:none;font-family:var(--hand);font-size:1.05rem}
+.home:hover{text-decoration:underline}
+.head h1{font-size:clamp(1.9rem,5vw,2.7rem)}
+.head h1 small{display:block;font-size:.5em;color:var(--orange);margin-bottom:4px}
+.idrow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.idrow label{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:end;gap:8px;font-size:.92rem}
+.idrow input{border:0;border-bottom:1.5px solid var(--ink);font:inherit;font-family:var(--hand);font-size:1.2rem;padding:0 4px;min-width:0;background:transparent;color:var(--ink)}
+.goals{background:var(--orange-soft);border-radius:6px;padding:14px 18px;display:grid;gap:6px}
+.goals b{font-family:var(--hand);font-size:1.2rem;color:var(--orange)}
+.goals ul{margin:0;padding-left:1.2em}
+
+.act{display:grid;gap:16px}
+.act-h{display:flex;align-items:baseline;gap:12px;border-bottom:1.5px solid var(--ink);padding-bottom:6px;flex-wrap:wrap}
+.act-h .no{font-family:var(--hand);font-size:1.05rem;color:#fff;background:var(--orange);padding:0 12px;border-radius:999px;white-space:nowrap}
+.act-h h2{font-size:1.65rem}
+.act-h .tool{margin-left:auto;font-size:.8rem;color:var(--muted)}
+.read{display:grid;gap:10px}
+ol.steps{margin:0;padding-left:1.4em;display:grid;gap:6px}
+ol.steps li::marker{font-family:var(--hand);color:var(--orange);font-weight:700}
+.q{display:grid;gap:10px;padding:14px 0 4px;border-top:1px dashed var(--rule)}
+.q .qt{font-weight:700}
+.q .qt::before{content:attr(data-n);font-family:var(--hand);color:var(--orange);font-size:1.25rem;margin-right:6px}
+textarea{width:100%;min-height:92px;font:inherit;font-family:var(--hand);font-size:1.2rem;line-height:32px;padding:0 8px;border:1px solid var(--rule);border-radius:4px;resize:vertical;color:var(--ink);
+  background:repeating-linear-gradient(to bottom,transparent 0 31px,var(--rule) 31px 32px),var(--paper);background-attachment:local}
+input.blank{font:inherit;font-family:var(--hand);font-size:1.2rem;width:7em;max-width:100%;border:0;border-bottom:1.5px solid var(--ink);text-align:center;background:transparent;color:var(--ink);padding:0 4px}
+select{font:inherit;font-size:.92rem;padding:3px 6px;border:1px solid var(--rule);border-radius:4px;background:var(--paper);color:var(--ink);max-width:100%}
+textarea:focus-visible,input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+.ok{background:var(--ok-soft)!important}
+.no-{background:var(--no-soft)!important}
+.check{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button{font:inherit;font-family:var(--hand);font-size:1.1rem;padding:2px 16px;border-radius:999px;border:1.5px solid var(--ink);background:var(--paper);color:var(--ink);cursor:pointer}
+button:hover{background:var(--ink);color:var(--paper)}
+button.pdf{background:var(--orange);border-color:var(--orange);color:#fff}
+button.pdf:hover{background:#b8520f;border-color:#b8520f}
+button:disabled{opacity:.6;cursor:wait}
+.result{font-size:.9rem;color:var(--muted)}
+details.hint{background:var(--memo);border-radius:4px;padding:8px 14px;font-size:.92rem}
+details.hint summary{cursor:pointer;font-family:var(--hand);font-size:1.1rem;color:var(--orange)}
+details.hint[open] summary{margin-bottom:6px}
+.tick{display:grid;gap:6px}
+.tick label{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+.tick input{accent-color:var(--orange);margin-top:6px;width:18px;height:18px;flex:none}
+
+.tbl{overflow-x:auto;border:1px solid var(--rule);border-radius:4px}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{padding:8px 12px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:middle}
+th{background:#f2f5f7;font-weight:700;font-size:.82rem}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+td input.blank{width:5.5em}
+.tag{font-family:var(--mono);font-size:.82rem;white-space:nowrap}
+
+.concept{border:1.5px solid var(--teal);border-radius:6px;padding:16px 18px;display:grid;gap:10px}
+.concept h3{font-size:1.35rem;color:var(--teal)}
+
+/* 오렌지3 화면 그림 */
+.mock{border:1px solid var(--rule);border-radius:6px;overflow:hidden;font-family:var(--mono);font-size:.78rem}
+.mock .bar{background:#eef1f3;padding:4px 10px;color:var(--muted);border-bottom:1px solid var(--rule)}
+.mock .body{display:grid;grid-template-columns:minmax(120px,190px) minmax(0,1fr);min-height:230px}
+.mock .pal{background:#f7f8f9;border-right:1px solid var(--rule);padding:8px;display:grid;gap:4px;align-content:start}
+.mock .pal div{padding:3px 8px;border-radius:3px;display:flex;align-items:center;gap:6px}
+.mock .pal i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.mock .canvas{position:relative;background:radial-gradient(#e3e8eb 1px,transparent 1.2px) 0 0/14px 14px;padding:10px;min-width:0}
+.mark{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--orange);color:#fff;font-family:var(--hand);font-size:1rem;font-weight:700}
+.flow{overflow-x:auto}
+.flow svg{display:block;min-width:520px;width:100%;height:auto}
+.flow text{font-family:var(--mono);font-size:12px;fill:var(--ink)}
+
+.fig{margin:0;display:grid;gap:6px;min-width:0}
+.fig img{width:100%;max-width:100%;height:auto;display:block;border:1px solid var(--rule);border-radius:4px}
+.fig figcaption{font-size:.8rem;color:var(--muted)}
+.fig.narrow{max-width:520px}
+.figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;align-items:start}
+code{overflow-wrap:anywhere}
+ol.route{list-style:none;margin:0;padding:0;display:grid;gap:14px;counter-reset:none}
+ol.route>li{border:1.5px solid var(--rule);border-radius:8px;padding:14px 16px;display:grid;gap:8px;position:relative;background:var(--paper)}
+ol.route>li+li::before{content:"▼";position:absolute;top:-17px;left:22px;font-size:.75rem;color:var(--orange);line-height:1}
+.rh{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.rh .rn{width:30px;height:30px;border-radius:50%;background:var(--orange);color:#fff;display:grid;place-items:center;font-family:var(--hand);font-size:1.15rem}
+.rh b{font-family:var(--hand);font-weight:400;font-size:1.35rem}
+.rh .rq{font-size:.85rem;color:var(--muted)}
+ol.route ul,ol.route ol.sub{margin:0;padding-left:1.3em;display:grid;gap:6px;font-size:.95rem}
+ol.route ol.sub{list-style:none;padding-left:0;counter-reset:sub}
+ol.route ol.sub>li{counter-increment:sub;padding:8px 12px;background:var(--orange-soft);border-radius:6px}
+ol.route ol.sub>li::before{content:"3-" counter(sub) " ";font-family:var(--hand);color:var(--orange);font-size:1.05rem}
+.w{font-family:var(--mono);font-size:.82em;background:var(--teal-soft);color:var(--teal);padding:0 6px;border-radius:999px;white-space:nowrap}
+td.mdesc{font-size:.88rem;color:var(--muted)}
+.self{display:grid;gap:8px}
+.self .row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;border-bottom:1px dashed var(--rule);padding-bottom:6px}
+.stars{display:flex;gap:2px}
+.stars button{border:0;padding:0 2px;font-size:1.5rem;line-height:1;color:var(--rule);background:none}
+.stars button.on{color:var(--orange)}
+.stars button:hover{background:none;color:var(--orange)}
+.foot{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;border-top:3px double var(--ink);padding-top:16px;font-size:.82rem;color:var(--muted)}
+.foot .btns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.toast{font-family:var(--hand);font-size:1.1rem;color:#2c7a3f}
+
+.pdfmode .sheet{box-shadow:none;border-radius:0}
+.pdfmode .check,.pdfmode .foot .btns,.pdfmode details.hint,.pdfmode .home,.pdfmode .copyurl{display:none!important}
+.ta-print{min-height:64px;white-space:pre-wrap;overflow-wrap:anywhere;font-family:var(--hand);font-size:1.2rem;line-height:32px;padding:4px 10px;border:1px solid var(--rule);border-bottom:2px solid var(--ink);border-radius:4px;background:#fff}
+.sel-print{font-family:var(--hand);font-size:1.15rem;border-bottom:1.5px solid var(--ink);padding:0 6px}
+@media (max-width:640px){
+  .idrow{grid-template-columns:minmax(0,1fr)}
+  .act-h .tool{margin-left:0;width:100%}
+  .mock .body{grid-template-columns:minmax(0,1fr)}
+  .mock .pal{border-right:0;border-bottom:1px solid var(--rule);grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+ul.plain{margin:0;padding-left:1.3em;display:grid;gap:6px}
+a.dl{display:inline-block;font-family:var(--hand);font-size:1.15rem;color:#fff;background:var(--teal);padding:4px 18px;border-radius:999px;text-decoration:none}
+a.dl:hover{background:#0f5361}
+.goals p{margin:0}
+.form{display:grid;gap:10px}
+.form label{display:grid;grid-template-columns:minmax(8em,auto) minmax(0,1fr);gap:10px;align-items:end;font-size:.95rem}
+input.line{border:0;border-bottom:1.5px solid var(--ink);font:inherit;font-family:var(--hand);font-size:1.15rem;padding:0 4px;min-width:0;width:100%;background:transparent;color:var(--ink)}
+table.grow td{padding:4px 6px}
+input.cell,input.hin{width:100%;min-width:6em;font:inherit;font-family:var(--hand);font-size:1.1rem;border:0;border-bottom:1px solid var(--rule);background:transparent;color:var(--ink);padding:2px 4px}
+input.cell.mono{font-family:var(--mono);font-size:.85rem}
+input.cell.num{text-align:right}
+input.hin{font-family:var(--serif);font-size:.82rem;font-weight:700;border-bottom:1px dashed var(--muted)}
+table.grow select{width:100%}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips label{display:flex;gap:6px;align-items:center;border:1px solid var(--rule);border-radius:999px;padding:2px 12px 2px 8px;font-family:var(--mono);font-size:.85rem;cursor:pointer}
+.chips input{accent-color:var(--orange)}
+.shot{display:grid;gap:6px}
+.shot .drop{display:grid;gap:4px;justify-items:center;width:100%;border:2px dashed var(--rule);border-radius:8px;background:#f7f9fa;padding:22px 14px;font-family:var(--serif);font-size:.95rem;color:var(--muted);cursor:pointer}
+.shot .drop span{font-family:var(--hand);font-size:1.2rem;color:var(--teal)}
+.shot .drop small{font-size:.8rem}
+.shot .drop:hover,.shot:focus-within .drop{border-color:var(--teal);background:var(--teal-soft);color:var(--ink)}
+.fig{margin:0;display:grid;gap:6px;min-width:0}
+.fig img{width:100%;max-width:100%;height:auto;display:block;border:1px solid var(--rule);border-radius:4px}
+.fig figcaption{font-size:.8rem;color:var(--muted)}
+table.rubric td:nth-child(3){font-size:.9rem}
+.checklist{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:6px}
+.checklist li{display:flex;gap:8px;align-items:center;padding:6px 10px;border-radius:6px;background:var(--no-soft);font-size:.92rem}
+.checklist li span{font-family:var(--hand);font-size:1.2rem;width:1em;text-align:center}
+.checklist li.done{background:var(--ok-soft)}
+.lockcover{min-height:70vh;display:grid;place-items:center}
+.lockbox{display:grid;gap:10px;justify-items:center;text-align:center;background:var(--paper);border-radius:8px;padding:36px 28px;max-width:420px;box-shadow:0 12px 32px rgba(20,30,40,.08)}
+.lockbox img{image-rendering:pixelated}
+.lockbox b{font-family:var(--hand);font-weight:400;font-size:1.6rem}
+.lockbox a{color:var(--teal);font-family:var(--hand);font-size:1.1rem}
+.pdfmode .addrow,.pdfmode .delrow,.pdfmode .shot:not(.has),.pdfmode .shot .check,.pdfmode a.dl,.pdfmode #submit{display:none!important}
+</style>
+</head>
+<body>
+<input type="file" id="picker" accept="image/*" hidden>
+<div class="lockcover" id="lockcover" hidden>
+  <div class="lockbox">
+    <img src="img/mingti-pixel.png" alt="" width="96" height="108">
+    <b>아직 공개되지 않은 학습지예요</b>
+    <p>선생님이 공개하면 이 화면에서 바로 열 수 있어요.</p>
+    <a href="index.html">← 밍티의 수업 목록으로</a>
+  </div>
+</div>
+
+<div class="sheet" id="sheet">
+<header class="head">
+  <div class="course"><a class="home" href="index.html">← 밍티의 수업 목록</a><span>정보 · 인공지능 수업 | 데이터 기반 인공지능</span><span>수행평가</span></div>
+  <h1><small>활동 학습지 3 · 수행평가</small>나만의 데이터로<br>인공지능 모델 만들기</h1>
+  <div class="idrow">
+    <label for="sid">학번 <input id="sid" autocomplete="off"></label>
+    <label for="sname">이름 <input id="sname" autocomplete="off"></label>
+    <label for="sdate">날짜 <input id="sdate" autocomplete="off"></label>
+  </div>
+  <div class="goals">
+    <b>과제</b>
+    <p>캐글(Kaggle)에서 내가 궁금한 것을 알아볼 수 있는 데이터를 직접 고르고, Orange3로 <b>데이터 전처리 → 상관관계 파악 → 모델 학습 → 결과 검증</b> 순서에 따라 인공지능 모델을 만들어 그 과정과 결과를 이 보고서에 정리합니다.</p>
+  </div>
+</header>
+
+<!-- 안내 -->
+<section class="act" id="guide">
+  <div class="act-h"><span class="no">안내</span><h2>제출물과 평가 기준</h2></div>
+  <div class="tbl"><table>
+    <thead><tr><th style="width:9em">항목</th><th>내용</th></tr></thead>
+    <tbody>
+      <tr><td>제출물 ①</td><td>이 보고서를 모두 채운 뒤 맨 아래 <b>PDF로 내려받기</b>로 만든 PDF 파일 (파일 이름: 학번_이름_수행평가.pdf)</td></tr>
+      <tr><td>제출물 ②</td><td>Orange3 워크플로 파일 (.ows) · Orange3 메뉴 File → Save As로 저장</td></tr>
+      <tr><td>제출 방법</td><td>선생님이 안내한 곳에 두 파일을 함께 올립니다.</td></tr>
+      <tr><td>제출 기한</td><td>(선생님이 적어 주세요)</td></tr>
+    </tbody>
+  </table></div>
+  <div class="tbl"><table class="rubric">
+    <thead><tr><th style="width:9em">평가 영역</th><th class="num" style="width:4em">배점</th><th>평가 기준</th></tr></thead>
+    <tbody>
+      <tr><td>데이터 선정과 이해</td><td class="num">20</td><td>탐구 질문이 분명하고, 질문에 알맞은 데이터를 골랐으며, 속성의 뜻과 역할(Role)을 바르게 정리했다.</td></tr>
+      <tr><td>데이터 전처리</td><td class="num">15</td><td>필요 없는 열, 이상한 값, 빈 값 등을 알맞은 위젯으로 처리하고 그 까닭을 설명했다.</td></tr>
+      <tr><td>상관관계 파악</td><td class="num">20</td><td>그래프와 숫자(Correlations, Rank 등)로 속성 사이의 관계를 살펴보고, 그 결과로 학습에 쓸 속성을 골랐다.</td></tr>
+      <tr><td>모델 학습</td><td class="num">15</td><td>target과 문제 유형(회귀·분류)을 바르게 정하고, 학습·테스트 데이터를 나눠 두 가지 이상의 모델을 학습시켰다.</td></tr>
+      <tr><td>결과 검증과 해석</td><td class="num">20</td><td>알맞은 지표로 모델을 비교하고, 처음 보는 데이터로 검증한 결과를 근거를 들어 해석했다.</td></tr>
+      <tr><td>결론과 성찰</td><td class="num">10</td><td>탐구 질문에 답하고, 한계와 개선점, 인공지능 활용의 윤리적 문제를 생각해 썼다.</td></tr>
+      <tr><td><b>합계</b></td><td class="num"><b>100</b></td><td></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 0. 데이터 고르기 -->
+<section class="act" id="s0">
+  <div class="act-h"><span class="no">0단계</span><h2>탐구 질문과 데이터 고르기</h2><span class="tool">Kaggle</span></div>
+  <div class="concept">
+    <h3>알아두기 · 좋은 데이터 고르는 법</h3>
+    <ul class="plain">
+      <li><b>CSV 파일</b>로 내려받을 수 있는 데이터를 고릅니다. (캐글 검색 화면 왼쪽 Filters → File Type: CSV)</li>
+      <li>행(데이터 수)이 <b>100개 이상</b>, 속성(열)이 <b>5개 이상</b>이면 분석하기 좋습니다.</li>
+      <li><b>맞히고 싶은 값(target)</b>이 분명해야 합니다. 숫자면 회귀, 종류면 분류 문제가 됩니다.</li>
+      <li>데이터 페이지의 <b>License</b>를 확인하고, 출처를 꼭 적습니다.</li>
+      <li>실제 사람의 이름, 연락처 같은 <b>개인정보가 들어 있는 데이터는 피합니다.</b></li>
+    </ul>
+    <p><a class="dl" href="https://www.kaggle.com/datasets" target="_blank" rel="noopener">캐글 데이터 찾아보기 ↗</a></p>
+  </div>
+  <div class="q">
+    <p class="qt" data-n="0-1.">내 탐구 질문은 무엇인가요? (예: 공부 시간과 수면 시간으로 시험 점수를 예측할 수 있을까?)</p>
+    <textarea id="q-question" aria-label="탐구 질문"></textarea>
+  </div>
+  <div class="q">
+    <p class="qt" data-n="0-2.">고른 데이터의 정보를 적어 봅시다.</p>
+    <div class="form">
+      <label for="d-name">데이터 이름 <input id="d-name" class="line" autocomplete="off"></label>
+      <label for="d-url">캐글 주소 <input id="d-url" class="line" type="url" inputmode="url" autocomplete="off" placeholder="https://www.kaggle.com/datasets/..."></label>
+      <label for="d-rows">행 수 (데이터 개수) <input id="d-rows" class="line" inputmode="numeric" autocomplete="off"></label>
+      <label for="d-cols">열 수 (속성 개수) <input id="d-cols" class="line" inputmode="numeric" autocomplete="off"></label>
+      <label for="d-license">라이선스 <input id="d-license" class="line" autocomplete="off" placeholder="예: CC0, CC BY 4.0"></label>
+    </div>
+  </div>
+  <div class="q">
+    <p class="qt" data-n="0-3.">이 데이터를 고른 까닭과, 이 데이터로 무엇을 알아낼 수 있을지 써 봅시다.</p>
+    <textarea id="q-why" aria-label="데이터를 고른 까닭"></textarea>
+  </div>
+</section>
+
+<!-- 1. 전처리 -->
+<section class="act" id="s1">
+  <div class="act-h"><span class="no">1단계</span><h2>데이터 전처리</h2><span class="tool">File · Data Table · Select Columns · Select Rows · Impute · Feature Constructor</span></div>
+  <div class="q">
+    <p class="qt" data-n="1-1.">데이터의 속성을 정리해 봅시다. (속성이 많으면 '줄 추가'를 누르세요. target은 꼭 넣어 주세요.)</p>
+    <div class="tbl"><table class="grow">
+      <thead><tr><th>속성 이름</th><th>뜻</th><th style="width:8.5em">Type</th><th style="width:7.5em">Role</th></tr></thead>
+      <tbody id="attrRows"></tbody>
+    </table></div>
+    <div class="check"><button type="button" class="addrow" data-table="attr">줄 추가</button><button type="button" class="delrow" data-table="attr">마지막 줄 지우기</button></div>
+  </div>
+  <div class="q">
+    <p class="qt" data-n="1-2.">내 탐구는 어떤 문제인가요? 그렇게 판단한 까닭도 써 봅시다.</p>
+    <p><select id="ptype" aria-label="문제 유형"><option value="">선택</option><option>회귀</option><option>분류</option></select></p>
+    <textarea id="ptype-why" aria-label="문제 유형 판단 까닭"></textarea>
+  </div>
+  <div class="q">
+    <p class="qt" data-n="1-3.">전처리에 사용한 위젯에 체크하고, 무엇을 왜 처리했는지 써 봅시다.</p>
+    <div class="chips">
+      <label><input type="checkbox" id="pre-selcol">Select Columns</label>
+      <label><input type="checkbox" id="pre-selrow">Select Rows</label>
+      <label><input type="checkbox" id="pre-impute">Impute</label>
+      <label><input type="checkbox" id="pre-feat">Feature Constructor</label>
+      <label><input type="checkbox" id="pre-prep">Preprocess</label>
+      <label><input type="checkbox" id="pre-etc">기타 (엑셀 등)</label>
+    </div>
+    <textarea id="pre-what" aria-label="전처리 내용" placeholder="예: 일련번호인 id 열은 소득과 관계가 없어서 Select Columns로 뺐다."></textarea>
+    <div class="shot" data-slot="pre"></div>
+  </div>
+</section>
+
+<!-- 2. 상관관계 -->
+<section class="act" id="s2">
+  <div class="act-h"><span class="no">2단계</span><h2>상관관계 파악</h2><span class="tool">Distributions · Box Plot · Scatter Plot · Correlations · Rank</span></div>
+  <div class="q">
+    <p class="qt" data-n="2-1.">관계를 살펴볼 때 사용한 위젯에 체크해 봅시다.</p>
+    <div class="chips">
+      <label><input type="checkbox" id="cor-dist">Distributions</label>
+      <label><input type="checkbox" id="cor-box">Box Plot</label>
+      <label><input type="checkbox" id="cor-scatter">Scatter Plot</label>
+      <label><input type="checkbox" id="cor-corr">Correlations</label>
+      <label><input type="checkbox" id="cor-rank">Rank</label>
+      <label><input type="checkbox" id="cor-proj">Find Informative Projections</label>
+    </div>
+  </div>
+  <div class="q">
+    <p class="qt" data-n="2-2.">target과 관련이 큰 속성은 무엇이었나요? 그래프나 숫자(상관계수, Rank 점수 등)를 근거로 써 봅시다.</p>
+    <textarea id="cor-find" aria-label="상관관계 파악 결과"></textarea>
+    <div class="shot" data-slot="cor1"></div>
+    <div class="shot" data-slot="cor2"></div>
+  </div>
+  <div class="q">
+    <p class="qt" data-n="2-3.">학습에 사용할 속성을 고르고, 고른 까닭을 써 봅시다.</p>
+    <textarea id="cor-select" aria-label="학습에 사용할 속성"></textarea>
+  </div>
+</section>
+
+<!-- 3. 모델 학습 -->
+<section class="act" id="s3">
+  <div class="act-h"><span class="no">3단계</span><h2>모델 학습</h2><span class="tool">Data Sampler · Model 위젯</span></div>
+  <div class="q">
+    <p class="qt" data-n="3-1.">타겟 변수 설정</p>
+    <div class="form">
+      <label for="m-target">target으로 정한 속성 <input id="m-target" class="line" autocomplete="off"></label>
+      <label for="m-target-type">target의 Type <select id="m-target-type"><option value="">선택</option><option>numeric (숫자 → 회귀)</option><option>categorical (종류 → 분류)</option></select></label>
+    </div>
+  </div>
+  <div class="q">
+    <p class="qt" data-n="3-2.">학습 데이터와 테스트 데이터를 어떻게 나눴나요?</p>
+    <div class="form">
+      <label for="split-method">나눈 방법 <select id="split-method"><option value="">선택</option><option>Data Sampler로 나눔</option><option>Test and Score의 Random sampling</option><option>Test and Score의 Cross validation</option></select></label>
+      <label for="split-ratio">설정 값 <input id="split-ratio" class="line" autocomplete="off" placeholder="예: 학습 70% · 테스트 30%, 10회 반복"></label>
+    </div>
+  </div>
+  <div class="q">
+    <p class="qt" data-n="3-3.">학습시킨 모델에 모두 체크해 봅시다. (두 가지 이상)</p>
+    <div class="chips">
+      <label><input type="checkbox" id="mod-lin">Linear Regression</label>
+      <label><input type="checkbox" id="mod-log">Logistic Regression</label>
+      <label><input type="checkbox" id="mod-knn">kNN</label>
+      <label><input type="checkbox" id="mod-tree">Tree</label>
+      <label><input type="checkbox" id="mod-rf">Random Forest</label>
+      <label><input type="checkbox" id="mod-svm">SVM</label>
+      <label><input type="checkbox" id="mod-nn">Neural Network</label>
+      <label><input type="checkbox" id="mod-nb">Naive Bayes</label>
+    </div>
+    <p>내 워크플로 전체 화면을 캡처해 올려 봅시다.</p>
+    <div class="shot" data-slot="flow"></div>
+  </div>
+</section>
+
+<!-- 4. 결과 검증 -->
+<section class="act" id="s4">
+  <div class="act-h"><span class="no">4단계</span><h2>결과 검증</h2><span class="tool">Test and Score · Confusion Matrix · Predictions</span></div>
+  <div class="q">
+    <p class="qt" data-n="4-1.">Test and Score 결과를 적어 봅시다. 첫 줄에 지표 이름을 쓰세요. (회귀: R², RMSE, MAE · 분류: CA, F1, Precision)</p>
+    <div class="tbl"><table class="grow">
+      <thead><tr><th>모델</th>
+        <th><input id="res-h1" class="hin" aria-label="지표 1 이름" placeholder="지표 1"></th>
+        <th><input id="res-h2" class="hin" aria-label="지표 2 이름" placeholder="지표 2"></th>
+        <th><input id="res-h3" class="hin" aria-label="지표 3 이름" placeholder="지표 3"></th></tr></thead>
+      <tbody id="resRows"></tbody>
+    </table></div>
+    <div class="check"><button type="button" class="addrow" data-table="res">줄 추가</button><button type="button" class="delrow" data-table="res">마지막 줄 지우기</button></div>
+    <div class="shot" data-slot="score"></div>
+  </div>
+  <div class="q">
+    <p class="qt" data-n="4-2.">가장 성능이 좋은 모델은 무엇이고, 어떤 지표를 근거로 판단했나요?</p>
+    <textarea id="res-best" aria-label="가장 좋은 모델과 근거"></textarea>
+  </div>
+  <div class="q">
+    <p class="qt" data-n="4-3.">테스트 데이터로 예측한 결과(Predictions)나 Confusion Matrix를 보고, 모델이 잘 맞힌 경우와 틀린 경우를 해석해 봅시다.</p>
+    <textarea id="res-interp" aria-label="예측 결과 해석"></textarea>
+    <div class="shot" data-slot="pred"></div>
+  </div>
+</section>
+
+<!-- 5. 결론 -->
+<section class="act" id="s5">
+  <div class="act-h"><span class="no">5단계</span><h2>결론과 성찰</h2></div>
+  <div class="q">
+    <p class="qt" data-n="5-1.">탐구 질문에 대한 나의 결론을 데이터 근거와 함께 써 봅시다.</p>
+    <textarea id="c-conclusion" aria-label="결론"></textarea>
+  </div>
+  <div class="q">
+    <p class="qt" data-n="5-2.">이번 분석의 한계는 무엇이고, 다시 한다면 무엇을 바꾸고 싶나요? (데이터 양, 속성, 모델, 설정 등)</p>
+    <textarea id="c-limit" aria-label="한계와 개선점"></textarea>
+  </div>
+  <div class="q">
+    <p class="qt" data-n="5-3.">내 모델을 실제로 쓴다면 어떤 문제(공정성, 개인정보, 잘못된 예측의 피해 등)가 생길 수 있을까요?</p>
+    <textarea id="c-ethics" aria-label="윤리적 고려"></textarea>
+  </div>
+  <div class="q">
+    <p class="qt" data-n="5-4.">수행평가를 하며 새로 배운 점이나 어려웠던 점을 자유롭게 써 봅시다.</p>
+    <textarea id="c-reflect" aria-label="배운 점"></textarea>
+  </div>
+</section>
+
+<!-- 제출 전 확인 -->
+<section class="act" id="submit">
+  <div class="act-h"><span class="no">제출 전</span><h2>빠뜨린 곳이 없는지 확인하기</h2></div>
+  <ul class="checklist" id="checklist"></ul>
+  <p class="result">모두 ✓가 되면 'PDF로 내려받기'를 눌러 PDF를 만들고, Orange3 워크플로(.ows) 파일과 함께 제출하세요.</p>
+</section>
+
+<footer class="foot">
+  <span>밍티의 AI 교실 · 학습지 3 · 수행평가 보고서</span>
+  <div class="btns"><span class="toast" id="toast" aria-live="polite"></span><button type="button" id="pdfBtn" class="pdf">PDF로 내려받기</button><button type="button" id="copyAll">답안 복사하기</button><button type="button" id="clearAll">모두 지우기</button></div>
+</footer>
+</div>
+
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const KEY="mintea-project-ws-v1";
+  let store={};try{store=JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){}
+  const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){toast("저장 공간이 부족해요. PDF로 먼저 내려받아 두세요.")}};
+  const toast=m=>{$("toast").textContent=m;clearTimeout(toast.t);toast.t=setTimeout(()=>$("toast").textContent="",3000)};
+
+  // 공개 여부 (선생님 화면에서 바꿈)
+  const params=new URLSearchParams(location.search);
+  const isPreview=params.has("preview")||window.frameElement;
+  if(!isPreview){
+    fetch("config.json?t="+Date.now(),{cache:"no-store"}).then(r=>r.ok?r.json():{}).catch(()=>({})).then(c=>{
+      if(!(c.published&&c.published.worksheet3)){$("lockcover").hidden=false;$("sheet").hidden=true}
+    });
+  }
+
+  // 표 줄
+  const TYPES=["","numeric","categorical","text","datetime"],ROLES=["","feature","target","meta","skip"];
+  const opt=(arr,ph)=>arr.map(v=>`<option value="${v}">${v||ph}</option>`).join("");
+  const rowHTML={
+    attr:i=>`<tr><td><input id="attr-name-${i}" class="cell mono" aria-label="${i}번 속성 이름"></td><td><input id="attr-mean-${i}" class="cell" aria-label="${i}번 속성 뜻"></td><td><select id="attr-type-${i}" aria-label="${i}번 Type">${opt(TYPES,"선택")}</select></td><td><select id="attr-role-${i}" aria-label="${i}번 Role">${opt(ROLES,"선택")}</select></td></tr>`,
+    res:i=>`<tr><td><input id="res-model-${i}" class="cell" aria-label="${i}번 모델 이름"></td><td><input id="res-v1-${i}" class="cell num" inputmode="decimal" aria-label="${i}번 지표 1"></td><td><input id="res-v2-${i}" class="cell num" inputmode="decimal" aria-label="${i}번 지표 2"></td><td><input id="res-v3-${i}" class="cell num" inputmode="decimal" aria-label="${i}번 지표 3"></td></tr>`
+  };
+  const body={attr:$("attrRows"),res:$("resRows")},MIN={attr:6,res:3},MAX={attr:40,res:12};
+  const count={attr:Math.max(MIN.attr,store._attr||0),res:Math.max(MIN.res,store._res||0)};
+  for(const t of ["attr","res"]){let h="";for(let i=1;i<=count[t];i++)h+=rowHTML[t](i);body[t].innerHTML=h}
+
+  // 저장/복원
+  function bind(el){
+    const k=el.id;if(!k||el.type==="file")return;
+    if(k in store){el.type==="checkbox"?el.checked=!!store[k]:el.value=store[k]}
+    el.addEventListener(el.tagName==="SELECT"||el.type==="checkbox"?"change":"input",()=>{store[k]=el.type==="checkbox"?el.checked:el.value;save();updateChecklist()});
+  }
+  document.querySelectorAll(".sheet input,.sheet textarea,.sheet select").forEach(bind);
+  document.querySelectorAll(".addrow").forEach(b=>b.onclick=()=>{
+    const t=b.dataset.table;if(count[t]>=MAX[t]){toast("더 추가할 수 없어요.");return}
+    count[t]++;store["_"+t]=count[t];save();
+    body[t].insertAdjacentHTML("beforeend",rowHTML[t](count[t]));
+    body[t].lastElementChild.querySelectorAll("input,select").forEach(bind);
+    body[t].lastElementChild.querySelector("input").focus();
+  });
+  document.querySelectorAll(".delrow").forEach(b=>b.onclick=()=>{
+    const t=b.dataset.table;if(count[t]<=MIN[t]){toast(`최소 ${MIN[t]}줄은 남겨 둬요.`);return}
+    const tr=body[t].lastElementChild;tr.querySelectorAll("[id]").forEach(e=>delete store[e.id]);tr.remove();
+    count[t]--;store["_"+t]=count[t];save();updateChecklist();
+  });
+
+  // 캡처 그림 (IndexedDB에 저장)
+  const SLOT_LABEL={pre:"전처리 화면 캡처",cor1:"관계를 보여 주는 그래프 캡처 1",cor2:"관계를 보여 주는 그래프 캡처 2",flow:"워크플로 전체 캡처",score:"Test and Score 결과 캡처",pred:"Predictions 또는 Confusion Matrix 캡처"};
+  let db=null;
+  const dbReady=new Promise(res=>{try{const r=indexedDB.open("mintea-project",1);r.onupgradeneeded=()=>r.result.createObjectStore("img");r.onsuccess=()=>{db=r.result;res()};r.onerror=()=>res()}catch(e){res()}});
+  const idb=(mode,fn)=>new Promise(res=>{if(!db)return res(null);try{const tx=db.transaction("img",mode);const q=fn(tx.objectStore("img"));tx.oncomplete=()=>res(q&&q.result);tx.onerror=()=>res(null)}catch(e){res(null)}});
+  const imgs={};
+  function renderShot(div){
+    const s=div.dataset.slot,src=imgs[s];
+    div.innerHTML=src?`<figure class="fig"><img src="${src}" alt="${SLOT_LABEL[s]}"><figcaption>${SLOT_LABEL[s]}</figcaption></figure><div class="check"><button type="button" data-act="change">다른 그림으로 바꾸기</button><button type="button" data-act="del">그림 지우기</button></div>`
+      :`<button type="button" class="drop" data-act="add"><span>＋ ${SLOT_LABEL[s]} 올리기</span><small>클릭해서 그림 파일을 고르거나, 캡처한 뒤 이 칸을 누르고 Ctrl+V로 붙여 넣으세요.</small></button>`;
+    div.classList.toggle("has",!!src);
+  }
+  let pickSlot=null;
+  document.querySelectorAll(".shot").forEach(div=>{
+    div.addEventListener("click",async e=>{
+      const b=e.target.closest("button");if(!b)return;const s=div.dataset.slot;
+      if(b.dataset.act==="del"){delete imgs[s];await idb("readwrite",st=>st.delete(s));renderShot(div);updateChecklist();return}
+      pickSlot=s;$("picker").value="";$("picker").click();
+    });
+    div.addEventListener("paste",e=>{const f=[...(e.clipboardData||{}).items||[]].find(i=>i.type.startsWith("image/"));if(f){e.preventDefault();setImg(div.dataset.slot,f.getAsFile())}});
+  });
+  async function shrink(f){
+    const bmp=await createImageBitmap(f);const sc=Math.min(1,1200/Math.max(bmp.width,bmp.height));
+    const c=document.createElement("canvas");c.width=Math.round(bmp.width*sc);c.height=Math.round(bmp.height*sc);
+    const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);x.drawImage(bmp,0,0,c.width,c.height);
+    return c.toDataURL("image/jpeg",0.82);
+  }
+  async function setImg(s,f){
+    let url;try{url=await shrink(f)}catch(e){toast("그림 파일만 올릴 수 있어요.");return}
+    imgs[s]=url;await idb("readwrite",st=>st.put(url,s));
+    renderShot(document.querySelector(`.shot[data-slot="${s}"]`));updateChecklist();toast("그림을 올렸어요.");
+  }
+  $("picker").onchange=()=>{const f=$("picker").files[0];if(f&&pickSlot)setImg(pickSlot,f)};
+  dbReady.then(async()=>{for(const s of Object.keys(SLOT_LABEL)){const v=await idb("readonly",st=>st.get(s));if(v)imgs[s]=v}
+    document.querySelectorAll(".shot").forEach(renderShot);updateChecklist()});
+  document.querySelectorAll(".shot").forEach(renderShot);
+
+  // 제출 전 확인
+  const filled=id=>{const e=$(id);return !!(e&&String(e.value).trim())};
+  const any=ids=>ids.some(id=>$(id)&&$(id).checked);
+  const CHECKS=[
+    ["학번과 이름",()=>filled("sid")&&filled("sname")],
+    ["0단계 · 탐구 질문",()=>filled("q-question")],
+    ["0단계 · 데이터 이름과 캐글 주소",()=>filled("d-name")&&filled("d-url")],
+    ["0단계 · 데이터를 고른 까닭",()=>filled("q-why")],
+    ["1단계 · 속성 표 (target 포함)",()=>[...document.querySelectorAll('[id^="attr-role-"]')].some(e=>e.value==="target")],
+    ["1단계 · 문제 유형과 까닭",()=>filled("ptype")&&filled("ptype-why")],
+    ["1단계 · 전처리 내용",()=>filled("pre-what")],
+    ["2단계 · 상관관계 파악 결과와 그래프 캡처",()=>filled("cor-find")&&!!(imgs.cor1||imgs.cor2)],
+    ["2단계 · 학습에 쓸 속성",()=>filled("cor-select")],
+    ["3단계 · target과 학습·테스트 나누기",()=>filled("m-target")&&filled("split-method")],
+    ["3단계 · 모델 두 가지 이상",()=>[...document.querySelectorAll('[id^="mod-"]')].filter(e=>e.checked).length>=2],
+    ["3단계 · 워크플로 캡처",()=>!!imgs.flow],
+    ["4단계 · 결과 표",()=>filled("res-model-1")&&filled("res-v1-1")],
+    ["4단계 · 가장 좋은 모델과 해석",()=>filled("res-best")&&filled("res-interp")],
+    ["5단계 · 결론, 한계, 윤리",()=>filled("c-conclusion")&&filled("c-limit")&&filled("c-ethics")]
+  ];
+  function updateChecklist(){$("checklist").innerHTML=CHECKS.map(([t,f])=>{const ok=f();return `<li class="${ok?"done":""}"><span>${ok?"✓":"·"}</span>${t}</li>`}).join("")}
+  updateChecklist();
+
+  // 복사·지우기·PDF
+  $("copyAll").onclick=()=>{
+    const lines=[`[수행평가 보고서] ${$("sid").value} ${$("sname").value} (${$("sdate").value})`];
+    document.querySelectorAll(".sheet input[id],.sheet select[id],.sheet textarea[id]").forEach(el=>{
+      if(["sid","sname","sdate"].includes(el.id))return;
+      const label=el.getAttribute("aria-label")||el.closest("label")?.textContent.trim()||el.id;
+      const v=el.type==="checkbox"?(el.checked?"사용":""):el.value.trim();if(v)lines.push(`${label}: ${v}`)});
+    const text=lines.join("\n");
+    const fb=()=>{const ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");toast("복사했어요")}catch(e){toast("복사가 안 되면 직접 선택해 주세요")}ta.remove()};
+    try{navigator.clipboard.writeText(text).then(()=>toast("복사했어요"),fb)}catch(e){fb()}
+  };
+  let armed=false;
+  $("clearAll").onclick=async()=>{
+    if(!armed){armed=true;$("clearAll").textContent="한 번 더 누르면 그림까지 모두 지워져요";setTimeout(()=>{armed=false;$("clearAll").textContent="모두 지우기"},3000);return}
+    store={};save();for(const s of Object.keys(imgs))delete imgs[s];await idb("readwrite",st=>st.clear());
+    location.reload();
+  };
+  $("pdfBtn").onclick=async()=>{
+    const btn=$("pdfBtn");btn.disabled=true;btn.textContent="PDF 만드는 중…";
+    const who=[$("sid").value.trim(),$("sname").value.trim()].filter(Boolean).join("_")||"학습지";
+    const opt={margin:[10,8,10,8],filename:`${who}_수행평가.pdf`,image:{type:"jpeg",quality:0.92},
+      html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",scrollX:0,scrollY:0,onclone:doc=>{
+        doc.body.classList.add("pdfmode");
+        doc.querySelectorAll("input").forEach(i=>{const o=document.getElementById(i.id);if(!o)return;if(i.type==="checkbox")i.checked=o.checked;else{i.value=o.value;i.setAttribute("value",o.value)}});
+        doc.querySelectorAll("textarea").forEach(t=>{const o=document.getElementById(t.id);const d=doc.createElement("div");d.className="ta-print";d.textContent=(o?o.value:t.value)||" ";t.replaceWith(d)});
+        doc.querySelectorAll("select").forEach(s=>{const o=document.getElementById(s.id);const sp=doc.createElement("span");sp.className="sel-print";sp.textContent=(o?o.value:s.value)||"-";s.replaceWith(sp)});
+      }},
+      jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},
+      pagebreak:{mode:["css","legacy"],avoid:[".q .qt",".concept","tr",".act-h",".fig",".chips"]}};
+    try{
+      if(!window.html2pdf)throw new Error("no lib");
+      const sy=window.scrollY;window.scrollTo(0,0);
+      await html2pdf().set(opt).from($("sheet")).save();
+      window.scrollTo(0,sy);toast("PDF를 내려받았어요");
+    }catch(e){toast("PDF를 만들지 못했어요. 인터넷 연결을 확인해 주세요.")}
+    finally{btn.disabled=false;btn.textContent="PDF로 내려받기"}
+  };
+})();
+</script>
+</body>
+</html>

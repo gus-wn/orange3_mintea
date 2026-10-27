@@ -13,6 +13,9 @@
 2. **태아의 건강 상태를 미리 알 수 있을까?** (`worksheet2.html`)
    Kaggle「Fetal Health Classification」데이터로 태아 건강 상태(정상·주의·나쁨)를 분류합니다. Distributions, Scatter Plot, Rank, 분류 모델 5가지, Confusion Matrix를 다룹니다.
 
+3. **나만의 데이터로 인공지능 모델 만들기** (`worksheet3.html`, 수행평가 보고서)
+   학생이 캐글 데이터를 골라 Orange3로 분석한 과정을 정리해 PDF로 제출합니다. 공개 여부는 `config.json`의 `published.worksheet3`로 정하며, 선생님 화면의 공개 버튼으로 바꿉니다.
+
 ## 파일
 
 - `index.html` 첫 화면 (학습지 목록)

@@ -40,6 +40,13 @@ header p{margin:0;font-size:.9rem}
   box-shadow:0 -2px 0 0 var(--line),0 2px 0 0 var(--line),-2px 0 0 0 var(--line),2px 0 0 0 var(--line);margin:2px}
 .btn:hover,button:hover{background:var(--pink-soft)}
 .btn.key{background:#e2f0f2}
+.pstate{font-weight:700}
+.pstate.on{color:#2c7a3f}.pstate.off{color:#b4381c}
+.btn.pubbtn{background:#fde3e9}
+.btn.pubbtn.on{background:#fff4e0}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.row.pub .pubmsg{grid-column:1/-1;margin:0;font-size:.8rem;color:#6b7d8c;min-height:0}
+.row.pub .pubmsg:empty{display:none}
 .btn.primary,button.primary{background:var(--brown);color:var(--white)}
 .btn.primary:hover,button.primary:hover{background:#6f462e}
 .btn:focus-visible,button:focus-visible,input:focus-visible{outline:3px dashed var(--pink);outline-offset:4px}
@@ -89,6 +96,12 @@ footer{text-align:center;font-size:.75rem;color:#8b7a58}
         <span class="no">2</span>
         <div><b>태아의 건강 상태를 미리 알 수 있을까?</b><small>worksheet2.html</small></div>
         <div class="acts"><a class="btn" href="worksheet2.html" target="_blank" rel="noopener">학생 화면</a><a class="btn key" href="key.html?file=worksheet2.html">예시 답안</a><a class="btn primary" href="editor.html?file=worksheet2.html">고치기</a></div>
+      </div>
+      <div class="row pub">
+        <span class="no">3</span>
+        <div><b>나만의 데이터로 인공지능 모델 만들기 (수행평가)</b><small>worksheet3.html · <span id="pubState" class="pstate">공개 상태 확인 중…</span></small></div>
+        <div class="acts"><a class="btn" href="worksheet3.html?preview=1" target="_blank" rel="noopener">미리 보기</a><a class="btn primary" href="editor.html?file=worksheet3.html">고치기</a><button type="button" class="btn pubbtn" id="pubBtn" disabled>학생에게 공개하기</button></div>
+        <p class="pubmsg" id="pubMsg" aria-live="polite"></p>
       </div>
       <div class="row">
         <span class="no alt">홈</span>
@@ -158,6 +171,43 @@ footer{text-align:center;font-size:.75rem;color:#8b7a58}
   };
   $("clearTok").onclick=()=>{set("");show(false,"연결 안 됨");$("msg").textContent="연결을 끊었어요.";$("msg").className="msg"};
   check(get());
+
+  // 3번 학습지 공개·비공개
+  let cfg={published:{}},cfgSha=null;
+  const b64t=s=>new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\s/g,"")),c=>c.charCodeAt(0)));
+  const tb64=t=>{const b=new TextEncoder().encode(t);let s="";for(const x of b)s+=String.fromCharCode(x);return btoa(s)};
+  function showPub(){
+    const on=!!(cfg.published&&cfg.published.worksheet3);
+    $("pubState").textContent=on?"학생에게 공개 중":"비공개 (선생님만 볼 수 있음)";$("pubState").className="pstate "+(on?"on":"off");
+    $("pubBtn").textContent=on?"비공개로 돌리기":"학생에게 공개하기";$("pubBtn").classList.toggle("on",on);
+  }
+  async function loadCfg(){
+    const t=get();
+    try{
+      if(t){const r=await fetch("https://api.github.com/repos/gus-wn/orange3_mintea/contents/config.json?ref=main&t="+Date.now(),{headers:{"Accept":"application/vnd.github+json","Authorization":"Bearer "+t},cache:"no-store"});
+        if(r.ok){const j=await r.json();cfgSha=j.sha;cfg=JSON.parse(b64t(j.content))}}
+      else{const r=await fetch("config.json?t="+Date.now(),{cache:"no-store"});if(r.ok)cfg=await r.json()}
+    }catch(e){}
+    cfg.published=cfg.published||{};showPub();$("pubBtn").disabled=false;
+  }
+  $("pubBtn").onclick=async()=>{
+    const t=get();
+    if(!t){$("pubMsg").textContent="아래 'GitHub 연결'에서 먼저 토큰을 넣어 주세요.";$("tok").focus();return}
+    const next=!(cfg.published&&cfg.published.worksheet3);
+    $("pubBtn").disabled=true;$("pubMsg").textContent="바꾸는 중…";
+    try{
+      const r0=await fetch("https://api.github.com/repos/gus-wn/orange3_mintea/contents/config.json?ref=main&t="+Date.now(),{headers:{"Accept":"application/vnd.github+json","Authorization":"Bearer "+t},cache:"no-store"});
+      if(r0.ok){const j=await r0.json();cfgSha=j.sha;cfg=JSON.parse(b64t(j.content));cfg.published=cfg.published||{}}
+      cfg.published.worksheet3=next;
+      const body={message:next?"3번 학습지(수행평가) 학생에게 공개":"3번 학습지(수행평가) 비공개로 전환",content:tb64(JSON.stringify(cfg,null,1)+"\n"),branch:"main"};if(cfgSha)body.sha=cfgSha;
+      const r=await fetch("https://api.github.com/repos/gus-wn/orange3_mintea/contents/config.json",{method:"PUT",headers:{"Accept":"application/vnd.github+json","Authorization":"Bearer "+t},body:JSON.stringify(body)});
+      if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(r.status===401?"토큰이 맞지 않거나 만료됐어요.":r.status===409?"다른 곳에서 먼저 바꿨어요. 새로고침해 주세요.":(e.message||("HTTP "+r.status)))}
+      cfgSha=(await r.json()).content.sha;showPub();
+      $("pubMsg").textContent=next?"공개했어요. 1~2분 뒤 학생 첫 화면에 3번이 나타나요. (학생은 새로고침 필요)":"비공개로 돌렸어요. 1~2분 뒤 학생 첫 화면에서 사라지고, 학습지 주소로 들어와도 잠긴 화면이 보여요.";
+    }catch(e){cfg.published.worksheet3=!next;showPub();$("pubMsg").textContent="바꾸지 못했어요: "+e.message}
+    finally{$("pubBtn").disabled=false}
+  };
+  loadCfg();
 })();
 </script>
 </body>

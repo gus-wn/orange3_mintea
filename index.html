@@ -22,6 +22,7 @@
 }
 @font-face{font-family:"KkubulimLocal";src:local("꾸불림체"),local("Kkubulim")}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{margin:0}
 body{
   min-height:100vh;background-color:var(--sky);color:var(--line);font-family:var(--pixel);font-size:15px;line-height:1.7;
@@ -149,6 +150,13 @@ footer{text-align:center;font-size:.75rem;color:var(--blue-deep);position:relati
           <span class="go">시작</span>
         </a>
       </li>
+      <li id="menu-3" hidden>
+        <a class="quest" href="worksheet3.html">
+          <span class="no">3</span>
+          <span class="t"><b>나만의 데이터로 인공지능 모델 만들기</b><span>수행평가 · 캐글 데이터 고르기 · 보고서 제출</span></span>
+          <span class="go">시작</span>
+        </a>
+      </li>
       <li class="locked" aria-label="다음 학습지 준비 중">[LOCK] 다음 학습지는 준비 중이에요</li>
     </ul>
     <div class="tips">
@@ -161,5 +169,10 @@ footer{text-align:center;font-size:.75rem;color:var(--blue-deep);position:relati
   <footer>© 밍티 · gus-wn</footer>
 </div>
 
+<script>
+fetch("config.json?t="+Date.now(),{cache:"no-store"}).then(r=>r.ok?r.json():{}).then(c=>{
+  if(c.published&&c.published.worksheet3)document.getElementById("menu-3").hidden=false;
+}).catch(()=>{});
+</script>
 </body>
 </html>
