@@ -199,6 +199,8 @@ footer{text-align:center;font-size:.75rem;color:#8b7a58}
       const r0=await fetch("https://api.github.com/repos/gus-wn/orange3_mintea/contents/config.json?ref=main&t="+Date.now(),{headers:{"Accept":"application/vnd.github+json","Authorization":"Bearer "+t},cache:"no-store"});
       if(r0.ok){const j=await r0.json();cfgSha=j.sha;cfg=JSON.parse(b64t(j.content));cfg.published=cfg.published||{}}
       cfg.published.worksheet3=next;
+      cfg.publishedAt=cfg.publishedAt||{};
+      if(next){const k=new Date(Date.now()+9*3600e3);cfg.publishedAt.worksheet3=k.toISOString().slice(0,10)}
       const body={message:next?"3번 학습지(수행평가) 학생에게 공개":"3번 학습지(수행평가) 비공개로 전환",content:tb64(JSON.stringify(cfg,null,1)+"\n"),branch:"main"};if(cfgSha)body.sha=cfgSha;
       const r=await fetch("https://api.github.com/repos/gus-wn/orange3_mintea/contents/config.json",{method:"PUT",headers:{"Accept":"application/vnd.github+json","Authorization":"Bearer "+t},body:JSON.stringify(body)});
       if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(r.status===401?"토큰이 맞지 않거나 만료됐어요.":r.status===409?"다른 곳에서 먼저 바꿨어요. 새로고침해 주세요.":(e.message||("HTTP "+r.status)))}

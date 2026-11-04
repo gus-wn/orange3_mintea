@@ -172,6 +172,7 @@ table.rubric td:nth-child(3){font-size:.9rem}
 .checklist li{display:flex;gap:8px;align-items:center;padding:6px 10px;border-radius:6px;background:var(--no-soft);font-size:.92rem}
 .checklist li span{font-family:var(--hand);font-size:1.2rem;width:1em;text-align:center}
 .checklist li.done{background:var(--ok-soft)}
+.sheet .read,.sheet .concept,.sheet .qt,.sheet .tbl td,.sheet .goals{-webkit-user-select:none;user-select:none}
 .lockcover{min-height:70vh;display:grid;place-items:center}
 .lockbox{display:grid;gap:10px;justify-items:center;text-align:center;background:var(--paper);border-radius:8px;padding:36px 28px;max-width:420px;box-shadow:0 12px 32px rgba(20,30,40,.08)}
 .lockbox img{image-rendering:pixelated}
@@ -208,26 +209,15 @@ table.rubric td:nth-child(3){font-size:.9rem}
 
 <!-- 안내 -->
 <section class="act" id="guide">
-  <div class="act-h"><span class="no">안내</span><h2>제출물과 평가 기준</h2></div>
+  <div class="act-h"><span class="no">안내</span><h2>제출물 안내</h2></div>
   <div class="tbl"><table>
     <thead><tr><th style="width:9em">항목</th><th>내용</th></tr></thead>
     <tbody>
       <tr><td>제출물 ①</td><td>이 보고서를 모두 채운 뒤 맨 아래 <b>PDF로 내려받기</b>로 만든 PDF 파일 <br>(파일 이름: 학번_이름_수행평가.pdf)</td></tr>
       <tr><td>제출물 ②</td><td>Orange3 워크플로 파일 (.ows) · Orange3 메뉴 File → Save As로 저장<br>(파일 이름 : 학번_이름_오렌지3.ows)</td></tr>
+      <tr><td>제출물 ③</td><td>분석에 사용한 데이터 파일 (.csv) · 캐글에서 내려받은 원본 파일 (전처리를 엑셀 등으로 했다면 수정한 파일도 함께)<br>(파일 이름: 학번_이름_데이터.csv)</td></tr>
       <tr><td>제출 공간</td><td>구글클래스룸 수행평가란</td></tr>
-      <tr><td>제출 기한</td><td>...</td></tr>
-    </tbody>
-  </table></div>
-  <div class="tbl"><table class="rubric">
-    <thead><tr><th style="width:9em">평가 영역</th><th class="num" style="width:4em">배점</th><th>평가 기준</th></tr></thead>
-    <tbody>
-      <tr><td>데이터 선정과 이해</td><td class="num">20</td><td>탐구 질문이 분명하고, 질문에 알맞은 데이터를 골랐으며, 속성의 뜻과 역할(Role)을 바르게 정리했다.</td></tr>
-      <tr><td>데이터 전처리</td><td class="num">15</td><td>필요 없는 열, 이상한 값, 빈 값 등을 알맞은 위젯으로 처리하고 그 까닭을 설명했다.</td></tr>
-      <tr><td>상관관계 파악</td><td class="num">20</td><td>그래프와 숫자(Correlations, Rank 등)로 속성 사이의 관계를 살펴보고, 그 결과로 학습에 쓸 속성을 골랐다.</td></tr>
-      <tr><td>모델 학습</td><td class="num">15</td><td>target과 문제 유형(회귀·분류)을 바르게 정하고, 학습·테스트 데이터를 나눠 두 가지 이상의 모델을 학습시켰다.</td></tr>
-      <tr><td>결과 검증과 해석</td><td class="num">20</td><td>알맞은 지표로 모델을 비교하고, 처음 보는 데이터로 검증한 결과를 근거를 들어 해석했다.</td></tr>
-      <tr><td>결론과 성찰</td><td class="num">10</td><td>탐구 질문에 답하고, 한계와 개선점, 인공지능 활용의 윤리적 문제를 생각해 썼다.</td></tr>
-      <tr><td><b>합계</b></td><td class="num"><b>100</b></td><td></td></tr>
+      <tr><td>제출 기한</td><td id="deadline">수행평가 시행일 당일 수업 시간 안</td></tr>
     </tbody>
   </table></div>
 </section>
@@ -413,7 +403,7 @@ table.rubric td:nth-child(3){font-size:.9rem}
 
 <footer class="foot">
   <span>밍티의 AI 교실 · 학습지 3 · 수행평가 보고서</span>
-  <div class="btns"><span class="toast" id="toast" aria-live="polite"></span><button type="button" id="pdfBtn" class="pdf">PDF로 내려받기</button><button type="button" id="copyAll">답안 복사하기</button><button type="button" id="clearAll">모두 지우기</button></div>
+  <div class="btns"><span class="toast" id="toast" aria-live="polite"></span><button type="button" id="pdfBtn" class="pdf">PDF로 내려받기</button><button type="button" id="clearAll">모두 지우기</button></div>
 </footer>
 </div>
 
@@ -431,8 +421,37 @@ table.rubric td:nth-child(3){font-size:.9rem}
   if(!isPreview){
     fetch("config.json?t="+Date.now(),{cache:"no-store"}).then(r=>r.ok?r.json():{}).catch(()=>({})).then(c=>{
       if(!(c.published&&c.published.worksheet3)){$("lockcover").hidden=false;$("sheet").hidden=true}
+      showDeadline(c);
     });
+  }else{
+    fetch("config.json?t="+Date.now(),{cache:"no-store"}).then(r=>r.ok?r.json():{}).catch(()=>({})).then(showDeadline);
   }
+
+  function showDeadline(c){
+    const d=c&&c.publishedAt&&c.publishedAt.worksheet3;if(!d||!/^\d{4}-\d{2}-\d{2}$/.test(d))return;
+    const [y,m,dd]=d.split("-").map(Number);const wk="일월화수목금토"[new Date(y,m-1,dd).getDay()];
+    $("deadline").innerHTML=`<b>${y}년 ${m}월 ${dd}일 (${wk})</b> 수행평가 시행일 당일 수업 시간 안`;
+  }
+
+  // 복사·붙여넣기 막기 (캡처 칸에 그림 붙여넣기만 허용)
+  const sheet=$("sheet");
+  const isShot=t=>t&&t.closest&&t.closest(".shot");
+  const block=(e,msg)=>{e.preventDefault();e.stopPropagation();toast(msg)};
+  ["copy","cut"].forEach(ev=>sheet.addEventListener(ev,e=>block(e,"이 보고서에서는 복사할 수 없어요."),true));
+  sheet.addEventListener("paste",e=>{
+    const items=[...((e.clipboardData||{}).items||[])];
+    if(isShot(e.target)&&items.some(i=>i.type.startsWith("image/")))return;
+    block(e,"붙여넣기는 할 수 없어요. 직접 입력해 주세요.");
+  },true);
+  sheet.addEventListener("beforeinput",e=>{if(/^insertFrom(Paste|Drop|YankRing)/.test(e.inputType))block(e,"붙여넣기는 할 수 없어요. 직접 입력해 주세요.")},true);
+  sheet.addEventListener("drop",e=>{if(!isShot(e.target))block(e,"끌어다 놓기는 할 수 없어요.")},true);
+  sheet.addEventListener("dragstart",e=>e.preventDefault(),true);
+  sheet.addEventListener("contextmenu",e=>{if(e.target.closest("input,textarea,.q,.read,.concept,table"))block(e,"이 보고서에서는 오른쪽 클릭 메뉴를 쓸 수 없어요.")},true);
+  sheet.addEventListener("keydown",e=>{
+    if(!(e.ctrlKey||e.metaKey))return;const k=e.key.toLowerCase();
+    if(k==="c"||k==="x")block(e,"이 보고서에서는 복사할 수 없어요.");
+    if(k==="v"&&!isShot(e.target)){/* paste 이벤트에서 막음 */}
+  },true);
 
   // 표 줄
   const TYPES=["","numeric","categorical","text","datetime"],ROLES=["","feature","target","meta","skip"];
@@ -474,7 +493,7 @@ table.rubric td:nth-child(3){font-size:.9rem}
   function renderShot(div){
     const s=div.dataset.slot,src=imgs[s];
     div.innerHTML=src?`<figure class="fig"><img src="${src}" alt="${SLOT_LABEL[s]}"><figcaption>${SLOT_LABEL[s]}</figcaption></figure><div class="check"><button type="button" data-act="change">다른 그림으로 바꾸기</button><button type="button" data-act="del">그림 지우기</button></div>`
-      :`<button type="button" class="drop" data-act="add"><span>＋ ${SLOT_LABEL[s]} 올리기</span><small>클릭해서 그림 파일을 고르거나, 캡처한 뒤 이 칸을 누르고 Ctrl+V로 붙여 넣으세요.</small></button>`;
+      :`<button type="button" class="drop" data-act="add"><span>＋ ${SLOT_LABEL[s]} 올리기</span><small>클릭해서 그림 파일을 고르거나, 그림 파일을 끌어다 놓거나, 캡처한 뒤 이 칸을 누르고 Ctrl+V로 붙여 넣으세요.</small></button>`;
     div.classList.toggle("has",!!src);
   }
   let pickSlot=null;
@@ -484,6 +503,8 @@ table.rubric td:nth-child(3){font-size:.9rem}
       if(b.dataset.act==="del"){delete imgs[s];await idb("readwrite",st=>st.delete(s));renderShot(div);updateChecklist();return}
       pickSlot=s;$("picker").value="";$("picker").click();
     });
+    div.addEventListener("dragover",e=>e.preventDefault());
+    div.addEventListener("drop",e=>{e.preventDefault();const f=[...(e.dataTransfer||{}).files||[]].find(f=>f.type.startsWith("image/"));if(f)setImg(div.dataset.slot,f)});
     div.addEventListener("paste",e=>{const f=[...(e.clipboardData||{}).items||[]].find(i=>i.type.startsWith("image/"));if(f){e.preventDefault();setImg(div.dataset.slot,f.getAsFile())}});
   });
   async function shrink(f){
@@ -526,16 +547,6 @@ table.rubric td:nth-child(3){font-size:.9rem}
   updateChecklist();
 
   // 복사·지우기·PDF
-  $("copyAll").onclick=()=>{
-    const lines=[`[수행평가 보고서] ${$("sid").value} ${$("sname").value} (${$("sdate").value})`];
-    document.querySelectorAll(".sheet input[id],.sheet select[id],.sheet textarea[id]").forEach(el=>{
-      if(["sid","sname","sdate"].includes(el.id))return;
-      const label=el.getAttribute("aria-label")||el.closest("label")?.textContent.trim()||el.id;
-      const v=el.type==="checkbox"?(el.checked?"사용":""):el.value.trim();if(v)lines.push(`${label}: ${v}`)});
-    const text=lines.join("\n");
-    const fb=()=>{const ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");toast("복사했어요")}catch(e){toast("복사가 안 되면 직접 선택해 주세요")}ta.remove()};
-    try{navigator.clipboard.writeText(text).then(()=>toast("복사했어요"),fb)}catch(e){fb()}
-  };
   let armed=false;
   $("clearAll").onclick=async()=>{
     if(!armed){armed=true;$("clearAll").textContent="한 번 더 누르면 그림까지 모두 지워져요";setTimeout(()=>{armed=false;$("clearAll").textContent="모두 지우기"},3000);return}
