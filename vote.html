@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>도덕적인 AI 토론</title>
+<meta name="description" content="『도덕적인 AI』 찬반 토론에서 맡고 싶은 주제와 입장을 골라요">
+<link rel="icon" href="img/mingti-pixel.png">
+<style>
+@font-face{font-family:"Galmuri11";src:url("fonts/Galmuri11.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Galmuri11";src:url("fonts/Galmuri11-Bold.woff2") format("woff2");font-weight:700;font-display:swap}
+@font-face{font-family:"Kkubulim";src:url("fonts/BMKkubulim.woff2") format("woff2");font-display:swap}
+/* Layout: 학생 첫 화면과 같은 도트 하늘. 밍티 말풍선 아래에 투표 용지 창 하나 — 이름, 1지망, 2지망, 내기. 라이트 고정. */
+:root{
+  color-scheme:light;
+  --sky:#cfeaf8; --sky-dot:#b9dff2; --blue:#7fc0e6; --blue-deep:#4f97c8;
+  --cream:#fbf4e2; --pink:#f2a3b4; --pink-soft:#fde3e9;
+  --brown:#8a5a3c; --line:#33506b; --white:#ffffff;
+  --pro:#4f97c8; --pro-soft:#e3f1fa; --con:#d0707a; --con-soft:#fde3e9;
+  --pixel:"Galmuri11","DotGothic16",monospace;
+  --hand:"Kkubulim","Galmuri11",cursive;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{
+  min-height:100vh;background-color:var(--sky);color:var(--line);font-family:var(--pixel);font-size:15px;line-height:1.7;
+  background-image:radial-gradient(var(--sky-dot) 1.6px,transparent 1.7px);background-size:16px 16px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:calc(env(safe-area-inset-top,0px) + 24px) calc(env(safe-area-inset-bottom,0px) + 40px);
+  -webkit-font-smoothing:none;word-break:keep-all;overflow-wrap:anywhere;
+}
+.wrap{max-width:760px;margin:0 auto;display:grid;gap:24px}
+a.home{justify-self:start;color:var(--blue-deep);font-size:.85rem;text-decoration:none}
+header{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:end}
+header img{width:110px;height:auto;image-rendering:pixelated}
+.bubble{position:relative;background:var(--white);padding:12px 16px;font-family:var(--hand);font-size:1.25rem;line-height:1.5;margin:8px;
+  box-shadow:0 -4px 0 0 var(--white),0 4px 0 0 var(--white),-4px 0 0 0 var(--white),4px 0 0 0 var(--white),
+  0 -8px 0 0 var(--line),0 8px 0 0 var(--line),-8px 0 0 0 var(--line),8px 0 0 0 var(--line),
+  -4px -4px 0 0 var(--line),4px -4px 0 0 var(--line),-4px 4px 0 0 var(--line),4px 4px 0 0 var(--line)}
+h1{margin:0 0 4px;font-size:clamp(1.6rem,5vw,2.2rem);line-height:1.2;color:var(--brown)}
+.window{background:var(--cream);box-shadow:0 -4px 0 0 var(--line),0 4px 0 0 var(--line),-4px 0 0 0 var(--line),4px 0 0 0 var(--line),8px 8px 0 0 rgba(51,80,107,.25);margin:4px}
+.titlebar{display:flex;align-items:center;gap:10px;background:var(--blue);color:var(--white);padding:6px 14px;font-weight:700;border-bottom:4px solid var(--line)}
+.titlebar.pink{background:var(--pink)}
+form,.body{padding:18px;display:grid;gap:22px}
+fieldset{border:0;margin:0;padding:0;display:grid;gap:10px;min-width:0}
+legend{font-weight:700;color:var(--brown);margin-bottom:8px;padding:0}
+legend small{font-weight:400;color:var(--blue-deep);font-size:.8rem;margin-left:6px}
+.name{font:inherit;font-size:1.05rem;padding:10px 12px;border:0;background:var(--white);color:var(--line);box-shadow:inset 0 0 0 3px var(--line);width:100%}
+.topics{display:grid;gap:10px}
+.opt{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start;background:var(--white);padding:12px 14px;cursor:pointer;
+  box-shadow:0 -3px 0 0 var(--line),0 3px 0 0 var(--line),-3px 0 0 0 var(--line),3px 0 0 0 var(--line);margin:3px}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.opt .no{font-weight:700;color:var(--white);background:var(--brown);min-width:2.2em;height:2.2em;display:grid;place-items:center;font-size:.9rem;padding:0 4px}
+.opt b{display:block;font-size:.8rem;color:var(--blue-deep)}
+.opt span.r{display:block;line-height:1.5}
+.opt:hover{background:var(--pink-soft)}
+.opt:has(input:checked){background:#fff4c9;box-shadow:0 -3px 0 0 var(--line),0 3px 0 0 var(--line),-3px 0 0 0 var(--line),3px 0 0 0 var(--line),5px 7px 0 0 var(--blue)}
+.opt:has(input:checked) .no{background:var(--blue-deep)}
+.opt:has(input:disabled){opacity:.35;cursor:not-allowed}
+.opt:has(input:focus-visible){outline:3px dashed var(--pink);outline-offset:6px}
+.sides{display:flex;flex-wrap:wrap;gap:8px}
+.side{position:relative;cursor:pointer;background:var(--white);padding:6px 16px;font-weight:700;
+  box-shadow:0 -2px 0 0 var(--line),0 2px 0 0 var(--line),-2px 0 0 0 var(--line),2px 0 0 0 var(--line);margin:2px}
+.side input{position:absolute;opacity:0;pointer-events:none}
+.side.pro:has(input:checked){background:var(--pro-soft);color:var(--pro)}
+.side.con:has(input:checked){background:var(--con-soft);color:var(--con)}
+.side.any:has(input:checked){background:#eee6cf}
+.side:has(input:checked)::before{content:"✔ "}
+.side:has(input:focus-visible){outline:3px dashed var(--pink);outline-offset:4px}
+.sub{font-size:.85rem;color:var(--blue-deep);margin:0}
+.send{font:inherit;font-weight:700;font-size:1.05rem;padding:10px 20px;background:var(--brown);color:var(--white);border:0;cursor:pointer;justify-self:start;
+  box-shadow:0 -3px 0 0 var(--line),0 3px 0 0 var(--line),-3px 0 0 0 var(--line),3px 0 0 0 var(--line),5px 7px 0 0 var(--blue)}
+.send:hover{background:#6f462e}
+.send:disabled{opacity:.6;cursor:wait}
+.send:focus-visible{outline:3px dashed var(--pink);outline-offset:6px}
+.msg{min-height:1.4em;font-size:.9rem}
+.msg.no{color:#b4381c} .msg.ok{color:#2c7a3f}
+.plist{margin:0;padding-left:1.4em;display:grid;gap:8px}
+.plist li b{color:var(--blue-deep);font-size:.85rem;display:block}
+.locked{padding:22px 18px;text-align:center;color:#6b8296}
+.done-box{display:grid;gap:8px}
+.done-box ul{margin:0;padding-left:1.2em}
+footer{text-align:center;font-size:.75rem;color:var(--blue-deep)}
+@media (max-width:560px){header{grid-template-columns:minmax(0,1fr)} header img{width:84px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="home" href="index.html">← 첫 화면으로</a>
+  <header>
+    <img src="img/mingti-pixel.png" alt="도트로 그린 밍티" width="132" height="148">
+    <div>
+      <h1>『도덕적인 AI』 찬반 토론</h1>
+      <p class="bubble">『도덕적인 AI』를 읽고 토론할 주제 4가지예요. 맡고 싶은 주제와 입장을 골라 주세요!</p>
+    </div>
+  </header>
+
+  <section class="window" id="closed" hidden>
+    <div class="titlebar pink">투표함</div>
+    <p class="locked" id="closedMsg">[LOCK] 지금은 투표 기간이 아니에요. 선생님이 열어 주시면 다시 들어와 주세요.</p>
+    <div class="body" style="padding-top:0"><b style="color:var(--brown)">토론 주제 미리 보기</b><ol class="plist" id="plist"></ol></div>
+  </section>
+
+  <section class="window" id="formWin" hidden>
+    <div class="titlebar">투표 용지 <span id="previewTag" hidden>· 선생님 미리 보기</span></div>
+    <form id="form" novalidate>
+      <fieldset>
+        <legend>이름<small>학교 학번과 이름 (예: 10719 이준우)</small></legend>
+        <input class="name" id="name" type="text" maxlength="30" autocomplete="off" placeholder="학번 이름">
+      </fieldset>
+
+      <fieldset>
+        <legend>1지망 주제<small>가장 하고 싶은 주제 하나</small></legend>
+        <div class="topics" id="first"></div>
+        <div class="sides" role="radiogroup" aria-label="1지망 입장" id="firstSide"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>2지망 주제<small>1지망이 꽉 찼을 때 갈 주제 (선택)</small></legend>
+        <div class="topics" id="second"></div>
+        <div class="sides" role="radiogroup" aria-label="2지망 입장" id="secondSide"></div>
+      </fieldset>
+
+      <p class="sub">한 주제에 찬성 1명, 반대 1명이 토론해요. 같은 이름으로 다시 내면 마지막에 낸 것만 반영돼요.</p>
+      <button class="send" id="send" type="submit">투표 내기 ▶</button>
+      <div class="msg" id="msg" aria-live="polite"></div>
+    </form>
+  </section>
+
+  <section class="window" id="doneWin" hidden>
+    <div class="titlebar">투표 완료</div>
+    <div class="body done-box">
+      <p class="bubble" style="margin:8px 8px 4px">투표를 냈어요! 토론 날 결과를 알려 줄게요.</p>
+      <ul id="doneList"></ul>
+      <button class="send" id="again" type="button">다시 고르기</button>
+    </div>
+  </section>
+
+  <footer>© 밍티 · gus-wn</footer>
+</div>
+
+<script>
+const TOPICS=[
+  {tag:"주제 1",short:"안전",res:"비상 상황의 안보·운송 시스템에서는 인간을 배제하고 AI에게 100% 판단을 맡겨야 한다."},
+  {tag:"주제 2",short:"프라이버시",res:"개인의 동의 여부와 상관없이 기업의 과도한 개인정보 수집·판매를 법으로 금지해야 한다."},
+  {tag:"주제 3",short:"공정성",res:"재범 예측·보석 결정 같은 사법 판단에서는 인간 판사보다 AI의 판단을 더 신뢰할 수 있다."},
+  {tag:"주제 4",short:"책임",res:"미래의 AI가 충분히 발전한다면, AI 자체에게 법적 책임(법인격)을 부여해야 한다."}
+];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let voteUrl="";
+const preview=new URLSearchParams(location.search).has("preview");
+
+function topicOpts(id){
+  $(id).innerHTML=TOPICS.map((t,i)=>`<label class="opt"><input type="radio" name="${id}" value="${i+1}"><span class="no">${i+1}</span><span><b>${t.tag} · ${t.short}</b><span class="r">${esc(t.res)}</span></span></label>`).join("");
+}
+function sideOpts(id){
+  $(id).innerHTML=[["찬성","pro"],["반대","con"],["상관없음","any"]].map(([l,c],i)=>`<label class="side ${c}"><input type="radio" name="${id}" value="${l}" ${i===2?"checked":""}>${l}</label>`).join("");
+}
+$("plist").innerHTML=TOPICS.map(t=>`<li><b>${t.tag} · ${t.short}</b>${esc(t.res)}</li>`).join("");
+topicOpts("first");topicOpts("second");sideOpts("firstSide");sideOpts("secondSide");
+const val=n=>{const el=document.querySelector(`input[name="${n}"]:checked`);return el?el.value:""};
+function syncSecond(){
+  const f=val("first");
+  document.querySelectorAll('input[name="second"]').forEach(inp=>{inp.disabled=inp.value===f; if(inp.disabled&&inp.checked) inp.checked=false;});
+}
+$("first").addEventListener("change",syncSecond);
+try{const n=localStorage.getItem("mintea-vote-name"); if(n) $("name").value=n;}catch(e){}
+
+$("form").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const name=$("name").value.replace(/\s+/g," ").trim(), first=val("first");
+  if(!name){$("msg").textContent="이름을 적어 주세요.";$("msg").className="msg no";$("name").focus();return}
+  if(!first){$("msg").textContent="1지망 주제를 골라 주세요.";$("msg").className="msg no";return}
+  if(!voteUrl){$("msg").textContent="투표함이 아직 연결되지 않았어요. 선생님께 알려 주세요.";$("msg").className="msg no";return}
+  const data={name,first:+first,firstSide:val("firstSide"),second:val("second")?+val("second"):"",secondSide:val("second")?val("secondSide"):""};
+  $("send").disabled=true;$("msg").textContent="보내는 중…";$("msg").className="msg";
+  try{
+    const r=await fetch(voteUrl,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(data)});
+    const j=await r.json().catch(()=>({ok:r.ok}));
+    if(!j.ok) throw new Error(j.error||"fail");
+    try{localStorage.setItem("mintea-vote-name",name)}catch(e){}
+    const t=n=>TOPICS[n-1];
+    $("doneList").innerHTML=`<li>${esc(name)}</li><li>1지망: ${t(data.first).tag} ${t(data.first).short} · ${data.firstSide}</li>`+(data.second?`<li>2지망: ${t(data.second).tag} ${t(data.second).short} · ${data.secondSide}</li>`:"");
+    $("formWin").hidden=true;$("doneWin").hidden=false;$("msg").textContent="";
+  }catch(err){
+    $("msg").textContent="보내지 못했어요. 인터넷 연결을 확인하고 다시 눌러 주세요.";$("msg").className="msg no";
+  }finally{$("send").disabled=false}
+});
+$("again").onclick=()=>{$("doneWin").hidden=true;$("formWin").hidden=false};
+
+fetch("config.json?t="+Date.now(),{cache:"no-store"}).then(r=>r.ok?r.json():{}).then(c=>{
+  voteUrl=c.voteUrl||"";
+  const open=!!(c.published&&c.published.vote);
+  if(open||preview){$("formWin").hidden=false;$("previewTag").hidden=open}
+  else{$("closed").hidden=false}
+}).catch(()=>{$("closed").hidden=false;$("closedMsg").textContent="투표함을 불러오지 못했어요. 새로고침해 주세요."});
+</script>
+</body>
+</html>
