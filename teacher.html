@@ -31,6 +31,7 @@ header p{margin:0;font-size:.9rem}
 .body{padding:18px;display:grid;gap:14px}
 .row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;background:var(--white);padding:12px 14px;
   box-shadow:0 -3px 0 0 var(--line),0 3px 0 0 var(--line),-3px 0 0 0 var(--line),3px 0 0 0 var(--line);margin:3px}
+.row .no.word{font-size:.85rem;letter-spacing:-.02em}
 .row .no{font-weight:700;font-size:1.2rem;color:var(--white);background:var(--brown);width:2em;height:2em;display:grid;place-items:center}
 .row .no.alt{background:var(--blue-deep)}
 .row b{display:block;line-height:1.45}
@@ -98,7 +99,7 @@ footer{text-align:center;font-size:.75rem;color:#8b7a58}
         <div class="acts"><a class="btn" href="worksheet2.html" target="_blank" rel="noopener">학생 화면</a><a class="btn key" href="key.html?file=worksheet2.html">예시 답안</a><a class="btn primary" href="editor.html?file=worksheet2.html">고치기</a></div>
       </div>
       <div class="row pub">
-        <span class="no">3</span>
+        <span class="no word">수행</span>
         <div><b>나만의 데이터로 인공지능 모델 만들기 (수행평가)</b><small>worksheet3.html · <span id="pubState" class="pstate">공개 상태 확인 중…</span></small></div>
         <div class="acts"><a class="btn" href="worksheet3.html?preview=1" target="_blank" rel="noopener">미리 보기</a><a class="btn primary" href="editor.html?file=worksheet3.html">고치기</a><button type="button" class="btn pubbtn" id="pubBtn" disabled>학생에게 공개하기</button></div>
         <p class="pubmsg" id="pubMsg" aria-live="polite"></p>
