@@ -158,11 +158,11 @@ footer{text-align:center;font-size:.75rem;color:var(--blue-deep);position:relati
           <span class="go">시작</span>
         </a>
       </li>
-      <li id="menu-vote" hidden>
+      <li id="menu-debate">
         <a class="quest" href="vote.html">
-          <span class="no word">투표</span>
-          <span class="t"><b>『도덕적인 AI』 토론 주제 투표함</b><span>토론 · 맡고 싶은 주제와 찬반 입장 고르기</span></span>
-          <span class="go">투표</span>
+          <span class="no word">토론</span>
+          <span class="t"><b>『도덕적인 AI』 찬반 토론</b><span>토론 주제 4가지 · 맡고 싶은 주제와 찬반 입장 투표</span></span>
+          <span class="go">시작</span>
         </a>
       </li>
       <li class="locked" aria-label="다음 학습지 준비 중">[LOCK] 다음 학습지는 준비 중이에요</li>
@@ -180,7 +180,6 @@ footer{text-align:center;font-size:.75rem;color:var(--blue-deep);position:relati
 <script>
 fetch("config.json?t="+Date.now(),{cache:"no-store"}).then(r=>r.ok?r.json():{}).then(c=>{
   if(c.published&&c.published.worksheet3)document.getElementById("menu-3").hidden=false;
-  if(c.published&&c.published.vote)document.getElementById("menu-vote").hidden=false;
 }).catch(()=>{});
 </script>
 </body>

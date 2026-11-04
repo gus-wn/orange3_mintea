@@ -17,7 +17,7 @@
    학생이 캐글 데이터를 골라 Orange3로 분석한 과정을 정리해 PDF로 제출합니다. 공개 여부는 `config.json`의 `published.worksheet3`로 정하며, 선생님 화면의 공개 버튼으로 바꿉니다.
 
 4. **『도덕적인 AI』 찬반 토론** (선생님 전용 `debate.html`, 학생용 투표함 `vote.html`)
-   Padlet 독서토론에서 고른 주제 4개(안전·프라이버시·공정성·책임)의 찬반 논거와 1:1 토론 순서 타이머입니다. 학생은 `vote.html`에서 원하는 주제·입장을 투표하고, 결과는 구글 시트(`apps-script/vote.gs`)에 쌓입니다. 투표함 공개 여부는 `config.json`의 `published.vote`, 시트 주소는 `voteUrl`로 정하며 선생님 화면에서 바꿉니다. 논제 문장을 고치면 `debate.html`과 `vote.html` 두 곳을 함께 고쳐야 합니다(학생 화면에 논거가 새지 않도록 따로 둠).
+   Padlet 독서토론에서 고른 주제 4개(안전·프라이버시·공정성·책임)의 찬반 논거와 1:1 토론 순서 타이머입니다. 학생은 `vote.html`에서 원하는 주제·입장을 투표하고, 결과는 구글 시트(`apps-script/vote.gs`)에 쌓입니다. 학생 첫 화면의 '토론' 칸(수행 아래)은 늘 보이고, 투표를 받을지는 `config.json`의 `published.vote`, 시트 주소는 `voteUrl`로 정하며 선생님 화면에서 바꿉니다. 논제 문장을 고치면 `debate.html`과 `vote.html` 두 곳을 함께 고쳐야 합니다(학생 화면에 논거가 새지 않도록 따로 둠).
 
 ## 파일
 
