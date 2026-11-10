@@ -244,7 +244,8 @@ table.rubric td:nth-child(3){font-size:.9rem}
     <p class="qt" data-n="0-2.">고른 데이터의 정보를 적어 봅시다.</p>
     <div class="form">
       <label for="d-name">데이터 이름 <input id="d-name" class="line" autocomplete="off"></label>
-      <label for="d-url">캐글 주소 <input id="d-url" class="line" type="url" inputmode="url" autocomplete="off" placeholder="https://www.kaggle.com/datasets/..."></label>
+      <label for="d-url">캐글 주소 <input id="d-url" class="line allow-paste" type="url" inputmode="url" autocomplete="off" placeholder="https://www.kaggle.com/datasets/..."></label>
+      <p class="result" style="margin:0">캐글 주소 칸은 복사·붙여넣기를 할 수 있어요. 데이터 페이지 주소창의 주소를 복사해 붙여 넣으세요.</p>
       <label for="d-rows">행 수 (데이터 개수) <input id="d-rows" class="line" inputmode="numeric" autocomplete="off"></label>
       <label for="d-cols">열 수 (속성 개수) <input id="d-cols" class="line" inputmode="numeric" autocomplete="off"></label>
       <label for="d-license">라이선스 <input id="d-license" class="line" autocomplete="off" placeholder="예: CC0, CC BY 4.0"></label>
@@ -433,22 +434,24 @@ table.rubric td:nth-child(3){font-size:.9rem}
     $("deadline").innerHTML=`<b>${y}년 ${m}월 ${dd}일 (${wk})</b> 수행평가 시행일 당일 수업 시간 안`;
   }
 
-  // 복사·붙여넣기 막기 (캡처 칸에 그림 붙여넣기만 허용)
+  // 복사·붙여넣기 막기 (캡처 칸 그림 붙여넣기와 캐글 주소 칸만 허용)
   const sheet=$("sheet");
   const isShot=t=>t&&t.closest&&t.closest(".shot");
+  const isFree=t=>t&&t.closest&&t.closest(".allow-paste");
   const block=(e,msg)=>{e.preventDefault();e.stopPropagation();toast(msg)};
-  ["copy","cut"].forEach(ev=>sheet.addEventListener(ev,e=>block(e,"이 보고서에서는 복사할 수 없어요."),true));
+  ["copy","cut"].forEach(ev=>sheet.addEventListener(ev,e=>isFree(e.target)||block(e,"이 보고서에서는 복사할 수 없어요."),true));
   sheet.addEventListener("paste",e=>{
+    if(isFree(e.target))return;
     const items=[...((e.clipboardData||{}).items||[])];
     if(isShot(e.target)&&items.some(i=>i.type.startsWith("image/")))return;
     block(e,"붙여넣기는 할 수 없어요. 직접 입력해 주세요.");
   },true);
-  sheet.addEventListener("beforeinput",e=>{if(/^insertFrom(Paste|Drop|YankRing)/.test(e.inputType))block(e,"붙여넣기는 할 수 없어요. 직접 입력해 주세요.")},true);
-  sheet.addEventListener("drop",e=>{if(!isShot(e.target))block(e,"끌어다 놓기는 할 수 없어요.")},true);
+  sheet.addEventListener("beforeinput",e=>{if(!isFree(e.target)&&/^insertFrom(Paste|Drop|YankRing)/.test(e.inputType))block(e,"붙여넣기는 할 수 없어요. 직접 입력해 주세요.")},true);
+  sheet.addEventListener("drop",e=>{if(!isShot(e.target)&&!isFree(e.target))block(e,"끌어다 놓기는 할 수 없어요.")},true);
   sheet.addEventListener("dragstart",e=>e.preventDefault(),true);
-  sheet.addEventListener("contextmenu",e=>{if(e.target.closest("input,textarea,.q,.read,.concept,table"))block(e,"이 보고서에서는 오른쪽 클릭 메뉴를 쓸 수 없어요.")},true);
+  sheet.addEventListener("contextmenu",e=>{if(!isFree(e.target)&&e.target.closest("input,textarea,.q,.read,.concept,table"))block(e,"이 보고서에서는 오른쪽 클릭 메뉴를 쓸 수 없어요.")},true);
   sheet.addEventListener("keydown",e=>{
-    if(!(e.ctrlKey||e.metaKey))return;const k=e.key.toLowerCase();
+    if(!(e.ctrlKey||e.metaKey)||isFree(e.target))return;const k=e.key.toLowerCase();
     if(k==="c"||k==="x")block(e,"이 보고서에서는 복사할 수 없어요.");
     if(k==="v"&&!isShot(e.target)){/* paste 이벤트에서 막음 */}
   },true);
