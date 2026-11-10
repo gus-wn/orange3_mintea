@@ -217,7 +217,7 @@ table.rubric td:nth-child(3){font-size:.9rem}
       <tr><td>제출물 ②</td><td>Orange3 워크플로 파일 (.ows) · Orange3 메뉴 File → Save As로 저장<br>(파일 이름 : 학번_이름_오렌지3.ows)</td></tr>
       <tr><td>제출물 ③</td><td>분석에 사용한 데이터 파일 (.csv) · 캐글에서 내려받은 원본 파일 (전처리를 엑셀 등으로 했다면 수정한 파일도 함께)<br>(파일 이름: 학번_이름_데이터.csv)</td></tr>
       <tr><td>제출 공간</td><td>구글클래스룸 수행평가란</td></tr>
-      <tr><td>제출 기한</td><td id="deadline">수행평가 시행일 당일 수업 시간 안</td></tr>
+      <tr><td>제출 기한</td><td id="deadline"><b>11/10(화)</b> 수업 시간 안</td></tr>
     </tbody>
   </table></div>
 </section>
@@ -429,6 +429,7 @@ table.rubric td:nth-child(3){font-size:.9rem}
   }
 
   function showDeadline(c){
+    if($("deadline").textContent.trim()!=="수행평가 시행일 당일 수업 시간 안")return; // 직접 적은 기한이 있으면 그대로 둠
     const d=c&&c.publishedAt&&c.publishedAt.worksheet3;if(!d||!/^\d{4}-\d{2}-\d{2}$/.test(d))return;
     const [y,m,dd]=d.split("-").map(Number);const wk="일월화수목금토"[new Date(y,m-1,dd).getDay()];
     $("deadline").innerHTML=`<b>${y}년 ${m}월 ${dd}일 (${wk})</b> 수행평가 시행일 당일 수업 시간 안`;
