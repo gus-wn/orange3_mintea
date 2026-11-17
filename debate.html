@@ -166,6 +166,28 @@ body.stage .resolution{text-align:center}
 .btn:disabled{opacity:.5;cursor:not-allowed}
 body.stage .votes{display:none}
 
+/* draw order */
+.draw{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:12px 18px 14px;display:flex;flex-direction:column;gap:10px}
+.draw-head{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.draw-head .vsum{flex:1 1 220px}
+.slots{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.slot{border:1px dashed var(--line);border-radius:5px;background:var(--paper);padding:8px 12px;display:flex;flex-direction:column;gap:2px;text-align:left;min-width:0;width:100%;cursor:pointer}
+.slot:disabled{cursor:default}
+.slot .ord{font-family:var(--f-mono);font-size:11.5px;color:var(--muted);letter-spacing:.04em}
+.slot .tp{font-family:var(--f-display);font-size:19px;font-weight:700;line-height:1.3}
+.slot .tp small{font-family:var(--f-body);font-size:13px;color:var(--muted);font-weight:500;margin-left:4px}
+.slot .who{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slot.set{border-style:solid;background:var(--card)}
+.slot.rolling .tp{color:var(--muted)}
+.slot.land{animation:land .35s ease-out}
+.slot.now{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.slot.now .ord::after{content:" · 진행 중";color:var(--ink);font-weight:600}
+@keyframes land{0%{transform:scale(1.08)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.slot.land{animation:none}}
+.tab .ordb{font-family:var(--f-mono);font-size:11px;border:1px solid currentColor;border-radius:999px;padding:0 5px;line-height:1.4;opacity:.8}
+body.stage .draw{display:none}
+@media (max-width:720px){.slots{grid-template-columns:1fr 1fr}}
+
 @media (max-width:720px){
   .vgrid{grid-template-columns:1fr 1fr}
   .roster,.notes{grid-template-columns:1fr}
@@ -183,6 +205,16 @@ body.stage .votes{display:none}
     </div>
     <nav class="tabs" role="tablist" id="tabs" aria-label="토론 주제"></nav>
   </header>
+
+  <section class="draw" aria-label="토론 순서 뽑기">
+    <div class="draw-head">
+      <span class="vt">토론 순서 뽑기</span>
+      <span class="vsum" id="drawSum">버튼을 누르면 주제 1~4의 토론 순서를 무작위로 정해요.</span>
+      <button class="btn primary" id="drawBtn" type="button">순서 뽑기</button>
+      <button class="btn" id="drawClear" type="button" hidden>지우기</button>
+    </div>
+    <ol class="slots" id="slots"></ol>
+  </section>
 
   <details class="votes" id="votes">
     <summary><span class="vt">학생 주제 투표 결과</span><span class="vsum" id="vsum">불러오는 중…</span></summary>
@@ -364,7 +396,7 @@ let running=false, lastTick=0, raf=null, beeped30=false, beeped0=false, audio=nu
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 
 function renderTabs(){
-  $("tabs").innerHTML = TOPICS.map((t,i)=>`<button class="tab" role="tab" type="button" aria-selected="${i===topic}" data-i="${i}">${t.tag}<small>${t.short}</small></button>`).join("");
+  $("tabs").innerHTML = TOPICS.map((t,i)=>`<button class="tab" role="tab" type="button" aria-selected="${i===topic}" data-i="${i}">${Array.isArray(order)&&order.length===4?`<span class="ordb">${order.indexOf(i)+1}번째</span>`:""}${t.tag}<small>${t.short}</small></button>`).join("");
   $("tabs").querySelectorAll(".tab").forEach(b=>b.onclick=()=>selectTopic(+b.dataset.i));
 }
 function renderTopic(){
@@ -490,6 +522,52 @@ document.addEventListener("keydown",e=>{
   else if(e.key==="f"||e.key==="F") toggleStage();
 });
 renderTabs(); renderTopic(); renderSteps(); renderTune(); paint();
+
+/* ── 토론 순서 뽑기 ── */
+var order = store.get("mai-order", []);
+if(!(Array.isArray(order)&&order.length===4&&[0,1,2,3].every(i=>order.includes(i)))) order=[];
+let drawing=false;
+function renderSlots(rolling){
+  const n=names;
+  $("slots").innerHTML=[0,1,2,3].map(k=>{
+    const ti=rolling?rolling[k]:order[k], has=ti!==undefined&&ti!==null;
+    const t=has?TOPICS[ti]:null;
+    const who=has?`${n[ti].pro||"찬성"} vs ${n[ti].con||"반대"}`:"";
+    const cls=["slot",has&&!rolling?"set":"",rolling&&has?"rolling":"",!rolling&&has&&ti===topic?"now":""].join(" ");
+    return `<li><button type="button" class="${cls}" data-t="${has?ti:""}" ${!has||rolling?"disabled":""}><span class="ord">${k+1}번째</span><span class="tp">${has?t.tag+"<small>"+t.short+"</small>":"?"}</span><span class="who">${has?esc(who):"&nbsp;"}</span></button></li>`;
+  }).join("");
+  $("slots").querySelectorAll(".slot.set").forEach(b=>b.onclick=()=>selectTopic(+b.dataset.t));
+  $("drawBtn").textContent=order.length?"다시 뽑기":"순서 뽑기";
+  $("drawClear").hidden=!order.length||!!rolling;
+  if(!rolling) $("drawSum").textContent=order.length?"칸을 누르면 그 주제로 넘어가요. 순서는 이 브라우저에 저장돼요.":"버튼을 누르면 주제 1~4의 토론 순서를 무작위로 정해요.";
+}
+function shuffle(){const a=[0,1,2,3];for(let i=3;i>0;i--){const j=crypto.getRandomValues(new Uint32Array(1))[0]%(i+1);[a[i],a[j]]=[a[j],a[i]]}return a}
+function draw(){
+  if(drawing) return; drawing=true; $("drawBtn").disabled=true;
+  const final=shuffle(), reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const finish=()=>{order=final;store.set("mai-order",order);drawing=false;$("drawBtn").disabled=false;renderSlots();renderTabs();
+    $("slots").querySelectorAll(".slot").forEach(b=>b.classList.add("land"));beep(880,.18,2);
+    $("drawSum").textContent=`순서: ${order.map(i=>TOPICS[i].tag).join(" → ")}. 칸을 누르면 그 주제로 넘어가요.`;};
+  if(reduce){finish();return}
+  $("drawSum").textContent="뽑는 중…";
+  let fixed=0, ticks=0;
+  const timer=setInterval(()=>{
+    ticks++;
+    if(ticks>12 && ticks%5===0) fixed++;
+    const rest=[0,1,2,3].filter(i=>!final.slice(0,fixed).includes(i));
+    const roll=[0,1,2,3].map(k=>k<fixed?final[k]:rest[Math.floor(Math.random()*rest.length)]);
+    renderSlots(roll);
+    if(ticks%2===0) beep(520+fixed*90,.04,1);
+    if(fixed>=4){clearInterval(timer);finish()}
+  },80);
+}
+$("drawBtn").onclick=draw;
+$("drawClear").onclick=()=>{order=[];store.set("mai-order",order);renderSlots();renderTabs()};
+const _selectTopic=selectTopic;
+selectTopic=function(i){_selectTopic(i);renderSlots()};
+const _renderTopic=renderTopic;
+renderTopic=function(){_renderTopic();if($("slots").children.length)renderSlots()};
+renderTabs(); renderSlots();
 
 /* ── 학생 주제 투표 결과 (vote.html → 구글 시트) ── */
 let votes=[], undoNames=null;
